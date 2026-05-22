@@ -7,8 +7,8 @@
     <ProjectGuid>{3FEF3D9D-E178-4DE7-B409-E88ED0E9A906}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>limonado</RootNamespace>
-    <AssemblyName>limonado</AssemblyName>
+    <RootNamespace>michitai</RootNamespace>
+    <AssemblyName>michitai</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
