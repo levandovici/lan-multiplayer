@@ -12,37 +12,79 @@ $messageType = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['code'])) {
     $code = trim($_POST['code']);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     
+    // Rate limiting: Max 5 attempts per 15 minutes per IP
     try {
         $db = getDbConnection();
         
-        $stmt = $db->prepare("SELECT id, verification_code, code_expires FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
+        // Check for rate limiting
+        $stmt = $db->prepare("SELECT COUNT(*) as attempts FROM failed_attempts WHERE ip_address = ? AND attempt_time > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+        $stmt->execute([$ip]);
+        $attempts = $stmt->fetch()['attempts'];
         
-        if (!$user) {
-            $message = 'Email not found. Please try again.';
-            $messageType = 'error';
-        } elseif ($user['verification_code'] !== $code) {
-            $message = 'Invalid verification code.';
-            $messageType = 'error';
-        } elseif (strtotime($user['code_expires']) < time()) {
-            $message = 'Verification code has expired. Please request a new one.';
+        if ($attempts >= 5) {
+            $message = 'Too many failed attempts. Please wait 15 minutes before trying again.';
             $messageType = 'error';
         } else {
-            // Mark as verified
-            $stmt = $db->prepare("UPDATE users SET is_verified = 1 WHERE email = ?");
+            // Check for rate limiting per email
+            $stmt = $db->prepare("SELECT COUNT(*) as attempts FROM failed_attempts WHERE email = ? AND attempt_time > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
             $stmt->execute([$email]);
+            $emailAttempts = $stmt->fetch()['attempts'];
             
-            $_SESSION['verified'] = true;
-            $_SESSION['user_id'] = $user['id'];
-            
-            header('Location: downloads.php');
-            exit;
+            if ($emailAttempts >= 5) {
+                $message = 'Too many failed attempts for this email. Please wait 15 minutes before trying again.';
+                $messageType = 'error';
+            } else {
+                $stmt = $db->prepare("SELECT id, verification_code, code_expires FROM users WHERE email = ?");
+                $stmt->execute([$email]);
+                $user = $stmt->fetch();
+                
+                if (!$user) {
+                    $message = 'Email not found. Please try again.';
+                    $messageType = 'error';
+                    logFailedAttempt($db, $email, $ip);
+                } elseif ($user['verification_code'] !== $code) {
+                    // Add delay to slow down brute force
+                    sleep(min($attempts, 2));
+                    
+                    $message = 'Invalid verification code.';
+                    $messageType = 'error';
+                    logFailedAttempt($db, $email, $ip);
+                } elseif (strtotime($user['code_expires']) < time()) {
+                    $message = 'Verification code has expired. Please request a new one.';
+                    $messageType = 'error';
+                    logFailedAttempt($db, $email, $ip);
+                } else {
+                    // Mark as verified and clear failed attempts
+                    $stmt = $db->prepare("UPDATE users SET is_verified = 1 WHERE email = ?");
+                    $stmt->execute([$email]);
+                    
+                    // Clear failed attempts for this email/IP on successful verification
+                    $stmt = $db->prepare("DELETE FROM failed_attempts WHERE email = ? OR ip_address = ?");
+                    $stmt->execute([$email, $ip]);
+                    
+                    $_SESSION['verified'] = true;
+                    $_SESSION['user_id'] = $user['id'];
+                    
+                    header('Location: downloads.php');
+                    exit;
+                }
+            }
         }
     } catch (Exception $e) {
         $message = 'Database error. Please try again.';
         $messageType = 'error';
+        error_log('Verification error: ' . $e->getMessage());
+    }
+}
+
+function logFailedAttempt($db, $email, $ip) {
+    try {
+        $stmt = $db->prepare("INSERT INTO failed_attempts (email, ip_address) VALUES (?, ?)");
+        $stmt->execute([$email, $ip]);
+    } catch (Exception $e) {
+        error_log('Failed to log attempt: ' . $e->getMessage());
     }
 }
 ?>

@@ -26,3 +26,14 @@ CREATE TABLE IF NOT EXISTS downloads (
     INDEX idx_user_id (user_id),
     INDEX idx_download_date (download_date)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Failed verification attempts tracking table
+CREATE TABLE IF NOT EXISTS failed_attempts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    ip_address VARCHAR(45) NOT NULL,
+    attempt_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_ip_address (ip_address),
+    INDEX idx_attempt_time (attempt_time)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
