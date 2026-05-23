@@ -33,71 +33,68 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class TCPServerClient
-{
-    private string _id;
-
-    private TcpClient _client;
-
-    private NetworkStream _stream;
-
-    private byte[] _read_buffer;
-
-    private byte[] _write_buffer;
-
-    private int _buffer_size;
-
-    private byte[] _read_message;
-
-    private byte[] _write_message;
-
-    private bool _closed;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a connected client on the TCP server, handling message communication.
     /// </summary>
-    private event Action<IdentifiedMessage> OnRequest;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    private event Action<string> OnStop;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public string ID => _id;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsClosed
+    public sealed class TCPServerClient
     {
-        get
+        private string _id;
+
+        private TcpClient _client;
+
+        private NetworkStream _stream;
+
+        private byte[] _read_buffer;
+
+        private byte[] _write_buffer;
+
+        private int _buffer_size;
+
+        private byte[] _read_message;
+
+        private byte[] _write_message;
+
+        private bool _closed;
+
+        /// <summary>
+        /// Event raised when a request is received from the client.
+        /// </summary>
+        private event Action<IdentifiedMessage> OnRequest;
+
+        /// <summary>
+        /// Event raised when the client stops.
+        /// </summary>
+        private event Action<string> OnStop;
+
+        /// <summary>
+        /// Gets the unique identifier for this client.
+        /// </summary>
+        public string ID => _id;
+
+        /// <summary>
+        /// Gets whether the client is closed.
+        /// </summary>
+        public bool IsClosed
         {
-            return _closed;
+            get
+            {
+                return _closed;
+            }
+
+            private set
+            {
+                _closed = value;
+            }
         }
 
-        private set
-        {
-            _closed = value;
-        }
-    }
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="client"></param>
-    /// <param name="on_request"></param>
-    /// <param name="on_stop"></param>
-    /// <param name="buffer_size"></param>
-    public TCPServerClient(TcpClient client, Action<IdentifiedMessage> on_request, Action<string> on_stop, int buffer_size = 4096)
+        /// <summary>
+        /// Initializes a new instance of TCPServerClient with the specified TCP client and callbacks.
+        /// </summary>
+        /// <param name="client">The TCP client connection.</param>
+        /// <param name="on_request">Callback for when a request is received.</param>
+        /// <param name="on_stop">Callback for when the client stops.</param>
+        /// <param name="buffer_size">The buffer size for data transfer.</param>
+        public TCPServerClient(TcpClient client, Action<IdentifiedMessage> on_request, Action<string> on_stop, int buffer_size = 4096)
     {
         _id = Guid.NewGuid().ToString();
 
@@ -138,10 +135,10 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the client by disconnecting and disposing all resources.
+        /// </summary>
+        public void Stop()
     {
         if (IsClosed)
             return;
@@ -172,11 +169,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="message"></param>
-    public void Response(Message message)
+        /// <summary>
+        /// Sends a response message to the client asynchronously.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        public void Response(Message message)
     {
         _write_message = Encoding.UTF8.GetBytes($"{message.GetMessage}#end#<>#message#");
 
@@ -197,11 +194,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    private int TransferWriteMessageBytes()
+        /// <summary>
+        /// Transfers bytes from the write message to the write buffer.
+        /// </summary>
+        /// <returns>The number of bytes transferred.</returns>
+        private int TransferWriteMessageBytes()
     {
         int count = 0;
 
@@ -228,11 +225,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="result"></param>
-    private void BeginReadCallback(IAsyncResult result)
+        /// <summary>
+        /// Callback for asynchronous read operations.
+        /// </summary>
+        /// <param name="result">The asynchronous operation result.</param>
+        private void BeginReadCallback(IAsyncResult result)
     {
         int count = -1;
 
@@ -320,11 +317,11 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="result"></param>
-    private void BeginWriteCallback(IAsyncResult result)
+        /// <summary>
+        /// Callback for asynchronous write operations.
+        /// </summary>
+        /// <param name="result">The asynchronous operation result.</param>
+        private void BeginWriteCallback(IAsyncResult result)
     {
         try
         {

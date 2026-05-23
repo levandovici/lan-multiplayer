@@ -33,15 +33,25 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public sealed class MultiplayerGamesData
-{
-    public ServerGameData[] Servers;
+    /// <summary>
+    /// Container for storing multiplayer game data including servers and clients.
+    /// </summary>
+    public sealed class MultiplayerGamesData
+    {
+        /// <summary>
+        /// Array of server game data.
+        /// </summary>
+        public ServerGameData[] Servers;
 
-    public ClientGameData[] Clients;
+        /// <summary>
+        /// Array of client game data.
+        /// </summary>
+        public ClientGameData[] Clients;
 
-
-
-    public MultiplayerGamesData()
+        /// <summary>
+        /// Initializes a new instance of MultiplayerGamesData with empty arrays.
+        /// </summary>
+        public MultiplayerGamesData()
     {
         Servers = new ServerGameData[0];
 

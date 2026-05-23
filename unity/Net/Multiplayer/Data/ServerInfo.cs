@@ -33,28 +33,31 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public class ServerInfo
-{
-    public int _port;
+    /// <summary>
+    /// Represents information about a multiplayer server including name, ID, port, and client count.
+    /// </summary>
+    public class ServerInfo
+    {
+        public int _port;
 
-    public int _clients_count;
+        public int _clients_count;
 
-    public string _server_id;
+        public string _server_id;
 
-    public string _name;
+        public string _name;
 
+        private readonly object _port_lock;
 
-    private readonly object _port_lock;
+        private readonly object _clients_count_lock;
 
-    private readonly object _clients_count_lock;
+        private readonly object _server_id_lock;
 
-    private readonly object _server_id_lock;
+        private readonly object _name_lock;
 
-    private readonly object _name_lock;
-
-
-
-    public string Name
+        /// <summary>
+        /// Gets or sets the server name.
+        /// </summary>
+        public string Name
     {
         get
         {
@@ -73,7 +76,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public string ServerID
+        /// <summary>
+        /// Gets or sets the server ID.
+        /// </summary>
+        public string ServerID
     {
         get
         {
@@ -92,7 +98,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public int Port
+        /// <summary>
+        /// Gets or sets the server port.
+        /// </summary>
+        public int Port
     {
         get
         {
@@ -111,7 +120,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public int ClientsCount
+        /// <summary>
+        /// Gets or sets the number of connected clients.
+        /// </summary>
+        public int ClientsCount
     {
         get
         {
@@ -132,14 +144,14 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="port"></param>
-    /// <param name="name"></param>
-    /// <param name="serverID"></param>
-    /// <param name="clientsCount"></param>
-    public ServerInfo(int port, string name, string serverID, int clientsCount)
+        /// <summary>
+        /// Initializes a new instance of ServerInfo with the specified parameters.
+        /// </summary>
+        /// <param name="port">The server port.</param>
+        /// <param name="name">The server name.</param>
+        /// <param name="serverID">The server ID.</param>
+        /// <param name="clientsCount">The number of connected clients.</param>
+        public ServerInfo(int port, string name, string serverID, int clientsCount)
     {
         _port = port;
 
@@ -159,10 +171,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         _clients_count_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerInfo()
+        /// <summary>
+        /// Initializes a new instance of ServerInfo with default values.
+        /// </summary>
+        public ServerInfo()
     {
         _port = 0;
 

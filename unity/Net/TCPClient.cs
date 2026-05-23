@@ -33,75 +33,72 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class TCPClient
-{
-    private IPEndPoint _ip_end_point;
-
-    private TcpClient _client;
-
-    private NetworkStream _stream;
-
-    private byte[] _read_buffer;
-
-    private byte[] _write_buffer;
-
-    private int _buffer_size;
-
-    private byte[] _read_message;
-
-    private byte[] _write_message;
-
-    private bool _closed;
-
-
-
     /// <summary>
-    /// 
+    /// Provides TCP client functionality for sending and receiving messages asynchronously.
     /// </summary>
-    public event Action<Message> OnResponse;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action OnStop;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsClosed
+    public sealed class TCPClient
     {
-        get
+        private IPEndPoint _ip_end_point;
+
+        private TcpClient _client;
+
+        private NetworkStream _stream;
+
+        private byte[] _read_buffer;
+
+        private byte[] _write_buffer;
+
+        private int _buffer_size;
+
+        private byte[] _read_message;
+
+        private byte[] _write_message;
+
+        private bool _closed;
+
+        /// <summary>
+        /// Event raised when a response message is received from the server.
+        /// </summary>
+        public event Action<Message> OnResponse;
+
+        /// <summary>
+        /// Event raised when the client stops.
+        /// </summary>
+        public event Action OnStop;
+
+        /// <summary>
+        /// Gets whether the client is closed.
+        /// </summary>
+        public bool IsClosed
         {
-            return _closed;
+            get
+            {
+                return _closed;
+            }
+
+            private set
+            {
+                _closed = value;
+            }
         }
 
-        private set
+        /// <summary>
+        /// Initializes a new instance of TCPClient with the specified IP address and port.
+        /// </summary>
+        /// <param name="ip">The IP address to connect to.</param>
+        /// <param name="port">The port number to connect to.</param>
+        /// <param name="buffer_size">The buffer size for data transfer.</param>
+        public TCPClient(IPAddress ip, int port, int buffer_size = 4096) :
+            this(new IPEndPoint(ip, port), buffer_size)
         {
-            _closed = value;
         }
-    }
 
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="buffer_size"></param>
-    public TCPClient(IPAddress ip, int port, int buffer_size = 4096) :
-        this(new IPEndPoint(ip, port), buffer_size)
-    {
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip_end_point"></param>
-    /// <param name="buffer_size"></param>
-    public TCPClient(IPEndPoint ip_end_point, int buffer_size = 4096)
+        /// <summary>
+        /// Initializes a new instance of TCPClient with the specified IP endpoint.
+        /// </summary>
+        /// <param name="ip_end_point">The IP endpoint to connect to.</param>
+        /// <param name="buffer_size">The buffer size for data transfer.</param>
+        public TCPClient(IPEndPoint ip_end_point, int buffer_size = 4096)
     {
         _ip_end_point = ip_end_point;
 
@@ -112,10 +109,10 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private void Initialize()
+        /// <summary>
+        /// Initializes the client's internal state and buffers.
+        /// </summary>
+        private void Initialize()
     {
         _client = new TcpClient();
 
@@ -132,10 +129,10 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Start()
+        /// <summary>
+        /// Starts the client by connecting to the server and beginning to read data.
+        /// </summary>
+        public void Start()
     {
         _client.Connect(_ip_end_point);
 
@@ -155,10 +152,10 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the client by disconnecting and disposing all resources.
+        /// </summary>
+        public void Stop()
     {
         if (IsClosed)
             return;
@@ -202,11 +199,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="message"></param>
-    public void Request(Message message)
+        /// <summary>
+        /// Sends a request message to the server asynchronously.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        public void Request(Message message)
     {
         _write_message = Encoding.UTF8.GetBytes($"{message.GetMessage}#end#<>#message#");
 
@@ -228,11 +225,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    private int TransferWriteMessageBytes()
+        /// <summary>
+        /// Transfers bytes from the write message to the write buffer.
+        /// </summary>
+        /// <returns>The number of bytes transferred.</returns>
+        private int TransferWriteMessageBytes()
     {
         int count = 0;
 
@@ -259,11 +256,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="result"></param>
-    private void BeginReadCallback(IAsyncResult result)
+        /// <summary>
+        /// Callback for asynchronous read operations.
+        /// </summary>
+        /// <param name="result">The asynchronous operation result.</param>
+        private void BeginReadCallback(IAsyncResult result)
     {
         int count = -1;
 
@@ -344,11 +341,11 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="result"></param>
-    private void BeginWriteCallback(IAsyncResult result)
+        /// <summary>
+        /// Callback for asynchronous write operations.
+        /// </summary>
+        /// <param name="result">The asynchronous operation result.</param>
+        private void BeginWriteCallback(IAsyncResult result)
     {
         try
         {

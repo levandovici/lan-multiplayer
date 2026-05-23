@@ -33,59 +33,82 @@ using UnityEngine;
 
 namespace Michitai.Lan.Data
 {
-            public sealed class JsonStorage : IJsonStorage
-{
-    public string json;
-
-    private object _json_lock;
-
-
-
-    public string Json
+    /// <summary>
+    /// Thread-safe implementation of JSON storage using Unity's JsonUtility for serialization.
+    /// </summary>
+    public sealed class JsonStorage : IJsonStorage
     {
-        get
+        /// <summary>
+        /// The raw JSON string representation of the stored data.
+        /// </summary>
+        public string json;
+
+        /// <summary>
+        /// Lock object for thread-safe access to the JSON data.
+        /// </summary>
+        private object _json_lock;
+
+        /// <summary>
+        /// Gets or sets the JSON string in a thread-safe manner.
+        /// </summary>
+        public string Json
         {
-            lock (_json_lock)
+            get
             {
-                return json;
+                lock (_json_lock)
+                {
+                    return json;
+                }
+            }
+
+            set
+            {
+                lock (_json_lock)
+                {
+                    json = value;
+                }
             }
         }
 
-        set
+        /// <summary>
+        /// Initializes a new instance of JsonStorage with an empty JSON string.
+        /// </summary>
+        public JsonStorage()
         {
-            lock (_json_lock)
-            {
-                json = value;
-            }
+            json = "";
+
+            _json_lock = new object();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of JsonStorage with the specified JSON string.
+        /// </summary>
+        /// <param name="json">The initial JSON string.</param>
+        public JsonStorage(string json)
+        {
+            this.json = json;
+
+            _json_lock = new object();
+        }
+
+        /// <summary>
+        /// Deserializes the JSON string into an object of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize into.</typeparam>
+        /// <returns>The deserialized object of type T.</returns>
+        public T Get<T>()
+        {
+            return JsonUtility.FromJson<T>(Json);
+        }
+
+        /// <summary>
+        /// Serializes the specified object to JSON and stores it in a thread-safe manner.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to serialize.</typeparam>
+        /// <param name="@object">The object to serialize to JSON.</param>
+        public void Set<T>(T @object)
+        {
+            Json = JsonUtility.ToJson(@object);
         }
     }
-
-
-
-    public JsonStorage()
-    {
-        json = "";
-
-        _json_lock = new object();
-    }
-
-    public JsonStorage(string json)
-    {
-        this.json = json;
-
-        _json_lock = new object();
-    }
-
-
-
-    public T Get<T>()
-    {
-        return JsonUtility.FromJson<T>(Json);
-    }
-
-    public void Set<T>(T @object)
-    {
-        Json = JsonUtility.ToJson(@object);
-    }
-}
 }

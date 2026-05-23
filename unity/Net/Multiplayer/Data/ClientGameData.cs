@@ -33,23 +33,23 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public sealed class ClientGameData
-{
-    public string server_id;
-
-    public Credentials credentials;
-
-
-    private readonly object _server_id_lock;
-
-    private readonly object _credentials_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Represents game data for a multiplayer client, including server ID and credentials.
     /// </summary>
-    public string Server_ID
+    public sealed class ClientGameData
+    {
+        public string server_id;
+
+        public Credentials credentials;
+
+        private readonly object _server_id_lock;
+
+        private readonly object _credentials_lock;
+
+        /// <summary>
+        /// Gets or sets the server ID the client is connected to.
+        /// </summary>
+        public string Server_ID
     {
         get
         {
@@ -68,10 +68,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Credentials Credentials
+        /// <summary>
+        /// Gets or sets the client's credentials.
+        /// </summary>
+        public Credentials Credentials
     {
         get
         {
@@ -92,12 +92,12 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="server_id"></param>
-    /// <param name="credentials"></param>
-    public ClientGameData(string server_id, Credentials credentials)
+        /// <summary>
+        /// Initializes a new instance of ClientGameData with the specified server ID and credentials.
+        /// </summary>
+        /// <param name="server_id">The server ID.</param>
+        /// <param name="credentials">The client's credentials.</param>
+        public ClientGameData(string server_id, Credentials credentials)
     {
         this.server_id = server_id;
 
@@ -109,10 +109,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         _credentials_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ClientGameData()
+        /// <summary>
+        /// Initializes a new instance of ClientGameData with default values.
+        /// </summary>
+        public ClientGameData()
     {
         server_id = "default";
 

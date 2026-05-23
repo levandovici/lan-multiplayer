@@ -33,8 +33,24 @@ using UnityEngine;
 
 namespace Michitai.Lan
 {
-        public enum EPlatform
-{
-    Windows = 1, Linux = 2, MacOS = 4, Standalone = 7, Android = 8, IOS = 16, Mobile = 24,
-}
+    /// <summary>
+    /// Enumeration of supported platforms for the LAN multiplayer system.
+    /// </summary>
+    public enum EPlatform
+    {
+        /// <summary>Windows desktop platform.</summary>
+        Windows = 1,
+        /// <summary>Linux desktop platform.</summary>
+        Linux = 2,
+        /// <summary>macOS desktop platform.</summary>
+        MacOS = 4,
+        /// <summary>All desktop platforms combined (Windows, Linux, macOS).</summary>
+        Standalone = 7,
+        /// <summary>Android mobile platform.</summary>
+        Android = 8,
+        /// <summary>iOS mobile platform.</summary>
+        IOS = 16,
+        /// <summary>All mobile platforms combined (Android, iOS).</summary>
+        Mobile = 24,
+    }
 }

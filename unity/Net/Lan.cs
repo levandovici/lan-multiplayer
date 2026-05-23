@@ -33,14 +33,17 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public static class Lan
-{
     /// <summary>
-    /// 
+    /// Provides static utility methods for LAN network operations including IP address retrieval.
     /// </summary>
-    /// <param name="platform"></param>
-    /// <returns>IPAddress Array of all local NetworkInterfaces</returns>
-    public static IPAddress[] LocalIPv4Addresses(EPlatform platform)
+    public static class Lan
+    {
+        /// <summary>
+        /// Gets all local IPv4 addresses for the specified platform.
+        /// </summary>
+        /// <param name="platform">The platform to query for IP addresses.</param>
+        /// <returns>IPAddress Array of all local NetworkInterfaces</returns>
+        public static IPAddress[] LocalIPv4Addresses(EPlatform platform)
     {
         var ip_addresses = new List<IPAddress>();
 
@@ -96,24 +99,24 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="platform"></param>
-    /// <returns>IPAddress Masks Array of all local NetworkInterfaces. Example 192.168.0.255</returns>
-    public static IPAddress[] LocalIPv4Masks(EPlatform platform)
+        /// <summary>
+        /// Gets all local IPv4 subnet masks for the specified platform.
+        /// </summary>
+        /// <param name="platform">The platform to query for subnet masks.</param>
+        /// <returns>IPAddress Masks Array of all local NetworkInterfaces. Example 192.168.0.255</returns>
+        public static IPAddress[] LocalIPv4Masks(EPlatform platform)
     {
         var ips = LocalIPv4Addresses(platform);
 
         return LocalIPv4Masks(ips);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="iPv4Addresses">IPAddresses Array. Example 192.168.0.1</param>
-    /// <returns>IPAddresses Masks Array. Example 192.168.0.255</returns>
-    public static IPAddress[] LocalIPv4Masks(IPAddress[] iPv4Addresses)
+        /// <summary>
+        /// Converts an array of IPv4 addresses to their corresponding subnet masks.
+        /// </summary>
+        /// <param name="iPv4Addresses">IPAddresses Array. Example 192.168.0.1</param>
+        /// <returns>IPAddresses Masks Array. Example 192.168.0.255</returns>
+        public static IPAddress[] LocalIPv4Masks(IPAddress[] iPv4Addresses)
     {
         return iPv4Addresses.Select(ip =>
         {
@@ -128,39 +131,39 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="platform"></param>
-    /// <param name="ipAddresses"></param>
-    /// <returns></returns>
-    public static bool TryGetLocalIPv4Addresses(EPlatform platform, out IPAddress[] ipAddresses)
+        /// <summary>
+        /// Attempts to get all local IPv4 addresses for the specified platform.
+        /// </summary>
+        /// <param name="platform">The platform to query for IP addresses.</param>
+        /// <param name="ipAddresses">When this method returns, contains the IP addresses if successful; otherwise, an empty array.</param>
+        /// <returns>True if any IP addresses were found; otherwise, false.</returns>
+        public static bool TryGetLocalIPv4Addresses(EPlatform platform, out IPAddress[] ipAddresses)
     {
         ipAddresses = LocalIPv4Addresses(platform);
 
         return ipAddresses.Length > 0;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="platform"></param>
-    /// <param name="masks"></param>
-    /// <returns></returns>
-    public static bool TryGetLocalIPv4Masks(EPlatform platform, out IPAddress[] masks)
+        /// <summary>
+        /// Attempts to get all local IPv4 subnet masks for the specified platform.
+        /// </summary>
+        /// <param name="platform">The platform to query for subnet masks.</param>
+        /// <param name="masks">When this method returns, contains the subnet masks if successful; otherwise, an empty array.</param>
+        /// <returns>True if any subnet masks were found; otherwise, false.</returns>
+        public static bool TryGetLocalIPv4Masks(EPlatform platform, out IPAddress[] masks)
     {
         masks = LocalIPv4Masks(platform);
 
         return masks.Length > 0;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="platform"></param>
-    /// <param name="masks"></param>
-    /// <returns></returns>
-    public static bool TryGetLocalIPv4Masks(EPlatform platform, out string[] masks)
+        /// <summary>
+        /// Attempts to get all local IPv4 subnet masks for the specified platform as strings.
+        /// </summary>
+        /// <param name="platform">The platform to query for subnet masks.</param>
+        /// <param name="masks">When this method returns, contains the subnet mask strings if successful; otherwise, an empty array.</param>
+        /// <returns>True if any subnet masks were found; otherwise, false.</returns>
+        public static bool TryGetLocalIPv4Masks(EPlatform platform, out string[] masks)
     {
         masks = LocalIPv4Masks(platform).Select(ip => ip.ToString()).ToArray();
 

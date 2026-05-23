@@ -33,18 +33,19 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Commands
 {
-            public sealed class Command
-{
-    public string[] args;
-
-    private object _args_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a command with arguments for terminal/command-line operations.
     /// </summary>
-    public string[] Arguments
+    public sealed class Command
+    {
+        public string[] args;
+
+        private object _args_lock;
+
+        /// <summary>
+        /// Gets or sets the command arguments.
+        /// </summary>
+        public string[] Arguments
     {
         get
         {
@@ -65,21 +66,21 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="args"></param>
-    private Command(params string[] args)
+        /// <summary>
+        /// Initializes a new instance of Command with the specified arguments.
+        /// </summary>
+        /// <param name="args">The command arguments.</param>
+        private Command(params string[] args)
     {
         this.args = args;
 
         _args_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Command()
+        /// <summary>
+        /// Initializes a new instance of Command with no arguments.
+        /// </summary>
+        public Command()
     {
         args = new string[0];
 
@@ -88,12 +89,12 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="argument"></param>
-    /// <returns></returns>
-    public Command Arg(string argument)
+        /// <summary>
+        /// Adds an argument to the command.
+        /// </summary>
+        /// <param name="argument">The argument to add.</param>
+        /// <returns>This command instance for method chaining.</returns>
+        public Command Arg(string argument)
     {
         lock (_args_lock)
         {
@@ -114,12 +115,12 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    public static Command New(string command)
+        /// <summary>
+        /// Creates a new command from a string, ensuring it starts with '/'.
+        /// </summary>
+        /// <param name="command">The command string.</param>
+        /// <returns>A new Command instance.</returns>
+        public static Command New(string command)
     {
         if (command[0] != '/')
         {
@@ -131,11 +132,11 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString()
+        /// <summary>
+        /// Returns a string representation of the command.
+        /// </summary>
+        /// <returns>A string containing all arguments.</returns>
+        public override string ToString()
     {
         lock (_args_lock)
         {
@@ -152,12 +153,12 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
-    public override bool Equals(object obj)
+        /// <summary>
+        /// Determines whether the specified object is equal to the current command by comparing the first argument.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True if the objects are equal; otherwise, false.</returns>
+        public override bool Equals(object obj)
     {
         if ((obj == null) || !this.GetType().Equals(obj.GetType()))
         {
@@ -174,11 +175,11 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override int GetHashCode()
+        /// <summary>
+        /// Returns a hash code for the current command.
+        /// </summary>
+        /// <returns>A hash code based on the arguments.</returns>
+        public override int GetHashCode()
     {
         lock (_args_lock)
         {
@@ -188,24 +189,24 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="A"></param>
-    /// <param name="B"></param>
-    /// <returns></returns>
-    public static bool operator ==(Command A, Command B)
+        /// <summary>
+        /// Determines whether two commands are equal.
+        /// </summary>
+        /// <param name="A">The first command.</param>
+        /// <param name="B">The second command.</param>
+        /// <returns>True if the commands are equal; otherwise, false.</returns>
+        public static bool operator ==(Command A, Command B)
     {
         return A.Equals(B);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="A"></param>
-    /// <param name="B"></param>
-    /// <returns></returns>
-    public static bool operator !=(Command A, Command B)
+        /// <summary>
+        /// Determines whether two commands are not equal.
+        /// </summary>
+        /// <param name="A">The first command.</param>
+        /// <param name="B">The second command.</param>
+        /// <returns>True if the commands are not equal; otherwise, false.</returns>
+        public static bool operator !=(Command A, Command B)
     {
         return !A.Equals(B);
     }

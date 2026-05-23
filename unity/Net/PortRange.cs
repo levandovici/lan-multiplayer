@@ -33,85 +33,78 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public struct PortRange
-{
     /// <summary>
-    /// 
+    /// Represents a range of network ports with predefined common port ranges.
     /// </summary>
-    public static PortRange System => new PortRange(0, 1023);
+    public struct PortRange
+    {
+        /// <summary>
+        /// System ports range (0-1023).
+        /// </summary>
+        public static PortRange System => new PortRange(0, 1023);
 
+        /// <summary>
+        /// Registered ports range (1024-49151).
+        /// </summary>
+        public static PortRange Registered => new PortRange(1024, 49151);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static PortRange Registered => new PortRange(1024, 49151);
+        /// <summary>
+        /// Dynamic/private ports range (49152-65535).
+        /// </summary>
+        public static PortRange Dynamic => new PortRange(49152, 65535);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static PortRange Dynamic => new PortRange(49152, 65535);
+        /// <summary>
+        /// All available ports from Min to Max.
+        /// </summary>
+        public static PortRange All => new PortRange(Min, Max);
 
+        /// <summary>
+        /// Broadcast ports range (1024 ports between 64512-65535).
+        /// </summary>
+        public static PortRange Broadcast => new PortRange(64512, 65535);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static PortRange All => new PortRange(Min, Max);
+        /// <summary>
+        /// Simplified broadcast ports range (128 ports between 65408-65535).
+        /// </summary>
+        public static PortRange BroadcastSimplified => new PortRange(65408, 65535);
 
+        /// <summary>
+        /// Minimum allowed port number.
+        /// </summary>
+        public const int Min = 1024;
 
-    /// <summary>
-    /// 1024 ports - inclusive between 64512 - 65535
-    /// </summary>
-    public static PortRange Broadcast => new PortRange(64512, 65535);
+        /// <summary>
+        /// Maximum allowed port number.
+        /// </summary>
+        public const int Max = 65535;
 
-    /// <summary>
-    /// 128 ports - inclusive between 65408 - 65535
-    /// </summary>
-    public static PortRange BroadcastSimplified => new PortRange(65408, 65535);
+        /// <summary>
+        /// The first port number in the range.
+        /// </summary>
+        public int First;
 
+        /// <summary>
+        /// The last port number in the range.
+        /// </summary>
+        public int Last;
 
+        /// <summary>
+        /// Gets the total number of ports in the range.
+        /// </summary>
+        public int Count => Last - First + 1;
 
-    /// <summary>
-    ///
-    /// </summary>
-    public const int Min = 1024;
+        /// <summary>
+        /// Gets a store for managing available ports in this range.
+        /// </summary>
+        public Store RangeStore => new Store(this);
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public const int Max = 65535;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public int First;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public int Last;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public int Count => Last - First + 1;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Store RangeStore => new Store(this);
-
-
-
-    /// <summary>
-    /// </summary>
-    /// <param name="first"></param>
-    /// <param name="last"></param>
-    /// <exception cref="ArgumentOutOfRangeException"></exception>
-    public PortRange(int first, int last)
+        /// <summary>
+        /// Initializes a new instance of PortRange with the specified first and last port numbers.
+        /// </summary>
+        /// <param name="first">The first port number in the range.</param>
+        /// <param name="last">The last port number in the range.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when first is less than Min or last is greater than Max.</exception>
+        public PortRange(int first, int last)
     {
         if (first < Min)
             throw new ArgumentOutOfRangeException("First can't be less than ServerPortRange.Min");
@@ -127,59 +120,62 @@ namespace Michitai.Lan.Net
 
 
 
-    public class Store
-    {
-        private System.Random _random;
-
-        private List<int> _ports;
-
-        private int _count;
-
-
-
         /// <summary>
-        /// 
+        /// Manages a pool of available ports from a PortRange, providing random port selection.
         /// </summary>
-        public int RandomPort
+        public class Store
         {
-            get
+            private System.Random _random;
+
+            private List<int> _ports;
+
+            private int _count;
+
+            /// <summary>
+            /// Gets a random available port from the store and removes it from the pool.
+            /// </summary>
+            /// <returns>A random available port number.</returns>
+            /// <exception cref="IndexOutOfRangeException">Thrown when no ports are available.</exception>
+            public int RandomPort
             {
-                if (_count > 0)
+                get
                 {
-                    int id = _random.Next(0, _count);
+                    if (_count > 0)
+                    {
+                        int id = _random.Next(0, _count);
 
+                        int item = _ports[id];
 
-                    int item = _ports[id];
+                        _ports.Remove(item);
 
-                    _ports.Remove(item);
+                        _count--;
 
-                    _count--;
-
-
-                    return item;
+                        return item;
+                    }
+                    else
+                    {
+                        throw new IndexOutOfRangeException("ServerPortRange.Store is Empty! All ports are in use!");
+                    }
                 }
-                else
+            }
+
+            /// <summary>
+            /// Initializes a new instance of Store with all ports from the specified range.
+            /// </summary>
+            /// <param name="range">The port range to populate the store with.</param>
+            public Store(PortRange range)
+            {
+                _random = new System.Random();
+
+                _ports = new List<int>();
+
+                for (int port = range.First; port <= range.Last; port++)
                 {
-                    throw new IndexOutOfRangeException("ServerPortRange.Store is Empty! All ports are in use!");
+                    _ports.Add(port);
+
+                    _count++;
                 }
             }
         }
-
-
-
-        public Store(PortRange range)
-        {
-            _random = new System.Random();
-
-            _ports = new List<int>();
-
-            for (int port = range.First; port <= range.Last; port++)
-            {
-                _ports.Add(port);
-
-                _count++;
-            }
-        }
-    }
 }
 }

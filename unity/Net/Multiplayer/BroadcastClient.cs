@@ -33,94 +33,100 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public sealed class BroadcastClient
-{
-    public delegate void OnReceiveResponseDelegate(LocatedMessage response);
-
-
-
-    private UDPBroadcast _socket;
-
-
-
     /// <summary>
-    /// 
+    /// Provides broadcast client functionality for discovering and communicating with servers on the network.
     /// </summary>
-    public UDPBroadcast Socket
+    public sealed class BroadcastClient
     {
-        get
+        /// <summary>
+        /// Delegate for handling received broadcast responses.
+        /// </summary>
+        /// <param name="response">The located message containing the response and its source.</param>
+        public delegate void OnReceiveResponseDelegate(LocatedMessage response);
+
+        private UDPBroadcast _socket;
+
+        /// <summary>
+        /// Gets or sets the underlying UDP broadcast socket.
+        /// </summary>
+        public UDPBroadcast Socket
         {
-            return _socket;
+            get
+            {
+                return _socket;
+            }
+
+            set
+            {
+                _socket = value;
+            }
         }
 
-        set
-        {
-            _socket = value;
-        }
-    }
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    public BroadcastClient(IPEndPoint point)
+        /// <summary>
+        /// Initializes a new instance of BroadcastClient with the specified IP endpoint.
+        /// </summary>
+        /// <param name="point">The IP endpoint to bind the broadcast socket to.</param>
+        public BroadcastClient(IPEndPoint point)
     {
         _socket = new UDPBroadcast(point);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    public BroadcastClient(IPAddress ip, int port)
+        /// <summary>
+        /// Initializes a new instance of BroadcastClient with the specified IP address and port.
+        /// </summary>
+        /// <param name="ip">The IP address to bind the broadcast socket to.</param>
+        /// <param name="port">The port number to bind the broadcast socket to.</param>
+        public BroadcastClient(IPAddress ip, int port)
     {
         _socket = new UDPBroadcast(ip, port);
     }
 
-    public BroadcastClient(IPAddress ip, PortRange range)
+        /// <summary>
+        /// Initializes a new instance of BroadcastClient with the specified IP address and port range, automatically selecting an available port.
+        /// </summary>
+        /// <param name="ip">The IP address to bind the broadcast socket to.</param>
+        /// <param name="range">The port range to search for an available port.</param>
+        public BroadcastClient(IPAddress ip, PortRange range)
     {
         _socket = new UDPBroadcast(ip, range);
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the broadcast client by closing the underlying socket.
+        /// </summary>
+        public void Stop()
     {
         Socket.Stop();
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <param name="receiveTimeoutMilliseconds"></param>
-    /// <returns></returns>
-    public LocatedMessage BroadcastRequest(IPAddress ip, int port, AppMessage message, int receiveTimeoutMilliseconds)
+        /// <summary>
+        /// Sends a broadcast request to a single IP and port, and waits for a response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="port">The port number to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="receiveTimeoutMilliseconds">The timeout in milliseconds for receiving a response.</param>
+        /// <returns>The located message containing the response.</returns>
+        public LocatedMessage BroadcastRequest(IPAddress ip, int port, AppMessage message, int receiveTimeoutMilliseconds)
     {
         Socket.Send(ip, port, message);
 
         return Socket.Receive(receiveTimeoutMilliseconds);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="range"></param>
-    /// <param name="message"></param>
-    /// <param name="receiveTimeoutMilliseconds"></param>
-    /// <returns></returns>
-    public LocatedMessage BroadcastRequest(IPAddress ip, PortRange range, AppMessage message, int receiveTimeoutMilliseconds)
+        /// <summary>
+        /// Sends a broadcast request to a port range on a single IP, and waits for a response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="range">The port range to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="receiveTimeoutMilliseconds">The timeout in milliseconds for receiving a response.</param>
+        /// <returns>The located message containing the response.</returns>
+        public LocatedMessage BroadcastRequest(IPAddress ip, PortRange range, AppMessage message, int receiveTimeoutMilliseconds)
     {
         for (int port = range.First; port <= range.Last; port++)
         {
@@ -132,15 +138,15 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <param name="onReceiveResponse"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    public void BeginBroadcastRequest(IPAddress ip, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Begins an asynchronous broadcast request to a single IP and port, invoking a callback for each response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="port">The port number to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public void BeginBroadcastRequest(IPAddress ip, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         Task.Run(() =>
         {
@@ -170,15 +176,15 @@ namespace Michitai.Lan.Net.Multiplayer
         source.Cancel();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="masks"></param>
-    /// <param name="range"></param>
-    /// <param name="message"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    /// <returns></returns>
-    public void BeginBroadcastRequest(IPAddress ip, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Begins an asynchronous broadcast request to a port range on a single IP, invoking a callback for each response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="range">The port range to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public void BeginBroadcastRequest(IPAddress ip, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         Task.Run(() =>
         {
@@ -212,15 +218,15 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="masks"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <param name="onReceiveResponse"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    public void BeginBroadcastRequest(IPAddress[] masks, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Begins an asynchronous broadcast request to multiple IPs on a single port, invoking a callback for each response.
+        /// </summary>
+        /// <param name="masks">The array of IP addresses to send the broadcast to.</param>
+        /// <param name="port">The port number to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public void BeginBroadcastRequest(IPAddress[] masks, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         Task.Run(() =>
         {
@@ -253,15 +259,15 @@ namespace Michitai.Lan.Net.Multiplayer
         source.Cancel();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="masks"></param>
-    /// <param name="range"></param>
-    /// <param name="message"></param>
-    /// <param name="onReceiveResponse"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    public void BeginBroadcastRequest(IPAddress[] masks, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Begins an asynchronous broadcast request to multiple IPs on a port range, invoking a callback for each response.
+        /// </summary>
+        /// <param name="masks">The array of IP addresses to send the broadcast to.</param>
+        /// <param name="range">The port range to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public void BeginBroadcastRequest(IPAddress[] masks, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         Task.Run(() =>
         {
@@ -298,26 +304,30 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <param name="receiveTimeoutMilliseconds"></param>
-    /// <returns></returns>
-    public async Task<LocatedMessage> BroadcastRequestAsync(IPAddress ip, int port, AppMessage message, int receiveTimeoutMilliseconds)
+        /// <summary>
+        /// Asynchronously sends a broadcast request to a single IP and port, and waits for a response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="port">The port number to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="receiveTimeoutMilliseconds">The timeout in milliseconds for receiving a response.</param>
+        /// <returns>The located message containing the response.</returns>
+        public async Task<LocatedMessage> BroadcastRequestAsync(IPAddress ip, int port, AppMessage message, int receiveTimeoutMilliseconds)
     {
         await Socket.SendAsync(ip, port, message);
 
         return await Socket.ReceiveAsync(receiveTimeoutMilliseconds);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public async Task<LocatedMessage> BroadcastRequestAsync(IPAddress ip, PortRange range, AppMessage message, int receiveTimeoutMilliseconds)
+        /// <summary>
+        /// Asynchronously sends a broadcast request to a port range on a single IP, and waits for a response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="range">The port range to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="receiveTimeoutMilliseconds">The timeout in milliseconds for receiving a response.</param>
+        /// <returns>The located message containing the response.</returns>
+        public async Task<LocatedMessage> BroadcastRequestAsync(IPAddress ip, PortRange range, AppMessage message, int receiveTimeoutMilliseconds)
     {
         await Socket.SendAsync(ip, range, message);
 
@@ -325,16 +335,15 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <param name="onReceiveResponse"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    /// <returns></returns>
-    public async Task BroadcastRequestAsync(IPAddress ip, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Asynchronously sends a broadcast request to a single IP and port, invoking a callback for each response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="port">The port number to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public async Task BroadcastRequestAsync(IPAddress ip, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         await Socket.SendAsync(ip, port, message);
 
@@ -366,16 +375,15 @@ namespace Michitai.Lan.Net.Multiplayer
         cancellationTokenSource.Cancel();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="range"></param>
-    /// <param name="message"></param>
-    /// <param name="onReceiveResponse"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    /// <returns></returns>
-    public async Task BroadcastRequestAsync(IPAddress ip, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Asynchronously sends a broadcast request to a port range on a single IP, invoking a callback for each response.
+        /// </summary>
+        /// <param name="ip">The IP address to send the broadcast to.</param>
+        /// <param name="range">The port range to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public async Task BroadcastRequestAsync(IPAddress ip, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         await Socket.SendAsync(ip, range, message);
 
@@ -407,16 +415,15 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="masks"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <param name="onReceiveResponse"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    /// <returns></returns>
-    public async Task BroadcastRequestAsync(IPAddress[] masks, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Asynchronously sends a broadcast request to multiple IPs on a single port, invoking a callback for each response.
+        /// </summary>
+        /// <param name="masks">The array of IP addresses to send the broadcast to.</param>
+        /// <param name="port">The port number to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public async Task BroadcastRequestAsync(IPAddress[] masks, int port, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         for (int i = 0; i < masks.Length; i++)
         {
@@ -450,16 +457,15 @@ namespace Michitai.Lan.Net.Multiplayer
         cancellationTokenSource.Cancel();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="masks"></param>
-    /// <param name="range"></param>
-    /// <param name="message"></param>
-    /// <param name="onReceiveResponse"></param>
-    /// <param name="receiveResponsesMilliseconds"></param>
-    /// <returns></returns>
-    public async Task BroadcastRequestAsync(IPAddress[] masks, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
+        /// <summary>
+        /// Asynchronously sends a broadcast request to multiple IPs on a port range, invoking a callback for each response.
+        /// </summary>
+        /// <param name="masks">The array of IP addresses to send the broadcast to.</param>
+        /// <param name="range">The port range to send the broadcast to.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="onReceiveResponse">Callback invoked for each received response.</param>
+        /// <param name="receiveResponsesMilliseconds">The duration in milliseconds to receive responses.</param>
+        public async Task BroadcastRequestAsync(IPAddress[] masks, PortRange range, AppMessage message, OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds)
     {
         for (int i = 0; i < masks.Length; i++)
         {

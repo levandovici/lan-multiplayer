@@ -33,36 +33,39 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class IdentifiedMessage
-{
-    private string _id;
-
-    private Message _message;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a message with a unique identifier for tracking purposes.
     /// </summary>
-    public string ID => _id;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public Message Message => _message;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="message"></param>
-    /// <param name="id"></param>
-    public IdentifiedMessage(Message message, string id)
+    public sealed class IdentifiedMessage
     {
-        _message = message;
+        private string _id;
 
-        _id = id;
-    }
+        private Message _message;
+
+
+
+        /// <summary>
+        /// Gets the unique identifier for this message.
+        /// </summary>
+        public string ID => _id;
+
+        /// <summary>
+        /// Gets the message content.
+        /// </summary>
+        public Message Message => _message;
+
+
+
+        /// <summary>
+        /// Initializes a new instance of IdentifiedMessage with the specified message and identifier.
+        /// </summary>
+        /// <param name="message">The message content.</param>
+        /// <param name="id">The unique identifier for the message.</param>
+        public IdentifiedMessage(Message message, string id)
+        {
+            _message = message;
+
+            _id = id;
+        }
 }
 }

@@ -33,26 +33,29 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class Message
-{
-    private string _message;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a simple message containing string content.
     /// </summary>
-    public string GetMessage => _message;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="message"></param>
-    public Message(string message)
+    public sealed class Message
     {
-        _message = message;
-    }
+        private string _message;
+
+
+
+        /// <summary>
+        /// Gets the message content.
+        /// </summary>
+        public string GetMessage => _message;
+
+
+
+        /// <summary>
+        /// Initializes a new instance of Message with the specified content.
+        /// </summary>
+        /// <param name="message">The message content.</param>
+        public Message(string message)
+        {
+            _message = message;
+        }
 }
 }

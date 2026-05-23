@@ -132,7 +132,15 @@ namespace Michitai.Lan.Net.Multiplayer
         _server.OnStop += () => OnDisconnected?.Invoke();
     }
 
-    public Server(string name, ServerGameData serverGameData, IPAddress ip, PortRange range, int bufferSize = 4096)
+        /// <summary>
+        /// Initializes a new instance of Server with the specified name, game data, IP address, and port range, automatically selecting an available port.
+        /// </summary>
+        /// <param name="name">The name of the server.</param>
+        /// <param name="serverGameData">The server's game data.</param>
+        /// <param name="ip">The IP address to listen on.</param>
+        /// <param name="range">The port range to search for an available port.</param>
+        /// <param name="bufferSize">The buffer size for data transfer.</param>
+        public Server(string name, ServerGameData serverGameData, IPAddress ip, PortRange range, int bufferSize = 4096)
     {
         _name = name;
 
@@ -174,50 +182,50 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Start()
+        /// <summary>
+        /// Starts the server and begins accepting client connections.
+        /// </summary>
+        public void Start()
     {
         _server.Start();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the server and disconnects all clients.
+        /// </summary>
+        public void Stop()
     {
         _server.Stop();
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="identified_message"></param>
-    public void Response(IdentifiedMessage identified_message)
+        /// <summary>
+        /// Sends a response message to a specific client.
+        /// </summary>
+        /// <param name="identified_message">The identified message containing the client ID and response content.</param>
+        public void Response(IdentifiedMessage identified_message)
     {
         _server.Response(identified_message);
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="credentials"></param>
-    public void LogInPlayer(string id, Credentials credentials)
+        /// <summary>
+        /// Logs in a player with the specified credentials.
+        /// </summary>
+        /// <param name="id">The client ID of the player.</param>
+        /// <param name="credentials">The player's credentials.</param>
+        public void LogInPlayer(string id, Credentials credentials)
     {
         _clients.LogIn(new ServerClient(id, credentials));
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    public void Disconnect(string id)
+        /// <summary>
+        /// Disconnects a client by ID and removes their data.
+        /// </summary>
+        /// <param name="id">The client ID to disconnect.</param>
+        public void Disconnect(string id)
     {
         ServerClient client;
 
@@ -233,12 +241,12 @@ namespace Michitai.Lan.Net.Multiplayer
         _server.Disconnect(id);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    public Credentials RegisterNewPlayer(JsonStorage data)
+        /// <summary>
+        /// Registers a new player with the specified game data.
+        /// </summary>
+        /// <param name="data">The player's game data.</param>
+        /// <returns>The credentials assigned to the new player.</returns>
+        public Credentials RegisterNewPlayer(JsonStorage data)
     {
         Credentials credentials = Credentials.New();
 
@@ -247,23 +255,23 @@ namespace Michitai.Lan.Net.Multiplayer
         return credentials;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    public bool Contains(Credentials player)
+        /// <summary>
+        /// Checks if the server contains a player with the specified credentials.
+        /// </summary>
+        /// <param name="player">The player's credentials.</param>
+        /// <returns>True if the player exists; otherwise, false.</returns>
+        public bool Contains(Credentials player)
     {
         return PrivateServerData.Contains(player);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="serverClientGameData"></param>
-    /// <returns></returns>
-    public bool TryGetLoggedInPlayerPublicData(string id, out ServerClientGameData serverClientGameData)
+        /// <summary>
+        /// Attempts to get the public game data of a logged-in player by ID.
+        /// </summary>
+        /// <param name="id">The client ID of the player.</param>
+        /// <param name="serverClientGameData">When this method returns, contains the player's public data if successful.</param>
+        /// <returns>True if the player was found; otherwise, false.</returns>
+        public bool TryGetLoggedInPlayerPublicData(string id, out ServerClientGameData serverClientGameData)
     {
         ServerClient serverClient;
 
@@ -281,13 +289,13 @@ namespace Michitai.Lan.Net.Multiplayer
         return false;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="serverClientGameData"></param>
-    /// <returns></returns>
-    public bool TryGetLoggedInPlayerPrivateData(string id, out ServerClientGameData serverClientGameData)
+        /// <summary>
+        /// Attempts to get the private game data of a logged-in player by ID.
+        /// </summary>
+        /// <param name="id">The client ID of the player.</param>
+        /// <param name="serverClientGameData">When this method returns, contains the player's private data if successful.</param>
+        /// <returns>True if the player was found; otherwise, false.</returns>
+        public bool TryGetLoggedInPlayerPrivateData(string id, out ServerClientGameData serverClientGameData)
     {
         ServerClient serverClient;
 
@@ -307,11 +315,11 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [Serializable]
-    public class ServerClients
+        /// <summary>
+        /// Manages a collection of connected server clients.
+        /// </summary>
+        [Serializable]
+        public class ServerClients
     {
         private ServerClient[] _clients;
 
@@ -320,7 +328,7 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of ServerClients.
         /// </summary>
         public ServerClients()
         {
@@ -332,9 +340,9 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
         /// <summary>
-        /// 
+        /// Logs in a client to the server.
         /// </summary>
-        /// <param name="player"></param>
+        /// <param name="player">The client to log in.</param>
         public void LogIn(ServerClient player)
         {
             lock (_clients_lock)
@@ -355,9 +363,9 @@ namespace Michitai.Lan.Net.Multiplayer
         }
 
         /// <summary>
-        /// 
+        /// Logs out a client from the server.
         /// </summary>
-        /// <param name="id"></param>
+        /// <param name="id">The client ID to log out.</param>
         public void LogOut(string id)
         {
             if (!Contains(id))
@@ -383,11 +391,11 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
         /// <summary>
-        /// 
+        /// Attempts to get a client by ID.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="serverClient"></param>
-        /// <returns></returns>
+        /// <param name="id">The client ID to search for.</param>
+        /// <param name="serverClient">When this method returns, contains the client if successful.</param>
+        /// <returns>True if the client was found; otherwise, false.</returns>
         public bool TryGetPlayer(string id, out ServerClient serverClient)
         {
             lock (_clients_lock)
@@ -430,6 +438,9 @@ namespace Michitai.Lan.Net.Multiplayer
         }
     }
 
+    /// <summary>
+    /// Represents a connected server client with credentials.
+    /// </summary>
     [Serializable]
     public class ServerClient
     {
@@ -437,13 +448,13 @@ namespace Michitai.Lan.Net.Multiplayer
 
         private Credentials _credentials;
 
-
         private readonly object _id_lock;
 
         private readonly object _credentials_lock;
 
-
-
+        /// <summary>
+        /// Gets the unique identifier for this client.
+        /// </summary>
         public string ID
         {
             get
@@ -455,6 +466,9 @@ namespace Michitai.Lan.Net.Multiplayer
             }
         }
 
+        /// <summary>
+        /// Gets the client's credentials.
+        /// </summary>
         public Credentials Credentials
         {
             get
@@ -468,6 +482,11 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
+        /// <summary>
+        /// Initializes a new instance of ServerClient with the specified ID and credentials.
+        /// </summary>
+        /// <param name="id">The unique identifier for the client.</param>
+        /// <param name="credentials">The client's credentials.</param>
         public ServerClient(string id, Credentials credentials)
         {
             _id = id;

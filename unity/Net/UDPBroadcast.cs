@@ -33,56 +33,55 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class UDPBroadcast
-{
-    private UdpClient _socket;
-
-
-
     /// <summary>
-    /// 
+    /// Provides UDP broadcast functionality for sending and receiving AppMessage objects over the network.
     /// </summary>
-    public UdpClient Socket
+    public sealed class UDPBroadcast
     {
-        get
+        private UdpClient _socket;
+
+        /// <summary>
+        /// Gets or sets the underlying UDP socket used for broadcast operations.
+        /// </summary>
+        public UdpClient Socket
         {
-            return _socket;
+            get
+            {
+                return _socket;
+            }
+
+            set
+            {
+                _socket = value;
+            }
         }
 
-        set
-        {
-            _socket = value;
-        }
-    }
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    public UDPBroadcast(IPEndPoint point)
+        /// <summary>
+        /// Initializes a new instance of UDPBroadcast with the specified IP endpoint.
+        /// </summary>
+        /// <param name="point">The IP endpoint to bind the UDP socket to.</param>
+        public UDPBroadcast(IPEndPoint point)
     {
         _socket = new UdpClient(point);
 
         _socket.EnableBroadcast = true;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    public UDPBroadcast(IPAddress ip, int port) : this(new IPEndPoint(ip, port))
-    {
-    }
+        /// <summary>
+        /// Initializes a new instance of UDPBroadcast with the specified IP address and port.
+        /// </summary>
+        /// <param name="ip">The IP address to bind the UDP socket to.</param>
+        /// <param name="port">The port number to bind the UDP socket to.</param>
+        public UDPBroadcast(IPAddress ip, int port) : this(new IPEndPoint(ip, port))
+        {
+        }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="range"></param>
-    public UDPBroadcast(IPAddress ip, PortRange range)
+        /// <summary>
+        /// Initializes a new instance of UDPBroadcast with the specified IP address and port range, automatically selecting an available port.
+        /// </summary>
+        /// <param name="ip">The IP address to bind the UDP socket to.</param>
+        /// <param name="range">The port range to search for an available port.</param>
+        public UDPBroadcast(IPAddress ip, PortRange range)
     {
         PortRange.Store store = range.RangeStore;
 
@@ -105,22 +104,25 @@ namespace Michitai.Lan.Net
 
 
 
-    public void Stop()
-    {
-        Socket.Close();
+        /// <summary>
+        /// Stops the UDP broadcast by closing and disposing the socket.
+        /// </summary>
+        public void Stop()
+        {
+            Socket.Close();
 
-        Socket.Dispose();
-    }
+            Socket.Dispose();
+        }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    /// <param name="message"></param>
-    /// <exception cref="InvalidDataException"></exception>
-    public void Send(IPEndPoint point, AppMessage message)
+        /// <summary>
+        /// Sends an AppMessage to the specified IP endpoint synchronously.
+        /// </summary>
+        /// <param name="point">The IP endpoint to send the message to.</param>
+        /// <param name="message">The message to send.</param>
+        /// <exception cref="InvalidDataException">Thrown when the message could not be sent completely.</exception>
+        public void Send(IPEndPoint point, AppMessage message)
     {
         var bytes = Encoding.UTF8.GetBytes(JsonUtility.ToJson(message));
 
@@ -133,24 +135,24 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    public void Send(IPAddress ip, int port, AppMessage message)
-    {
-        Send(new IPEndPoint(ip, port), message);
-    }
+        /// <summary>
+        /// Sends an AppMessage to the specified IP address and port synchronously.
+        /// </summary>
+        /// <param name="ip">The IP address to send the message to.</param>
+        /// <param name="port">The port number to send the message to.</param>
+        /// <param name="message">The message to send.</param>
+        public void Send(IPAddress ip, int port, AppMessage message)
+        {
+            Send(new IPEndPoint(ip, port), message);
+        }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public LocatedMessage Receive()
+        /// <summary>
+        /// Receives a message synchronously and returns it with its source location.
+        /// </summary>
+        /// <returns>A LocatedMessage containing the received message and its source IP endpoint.</returns>
+        public LocatedMessage Receive()
     {
         IPEndPoint point = null;
 
@@ -168,12 +170,12 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="timeoutMilliseconds"></param>
-    /// <returns></returns>
-    public LocatedMessage Receive(int timeoutMilliseconds)
+        /// <summary>
+        /// Receives a message synchronously with a timeout, returning it with its source location.
+        /// </summary>
+        /// <param name="timeoutMilliseconds">The timeout in milliseconds.</param>
+        /// <returns>A LocatedMessage containing the received message and its source IP endpoint, or an empty LocatedMessage if timeout occurs.</returns>
+        public LocatedMessage Receive(int timeoutMilliseconds)
     {
         Task timeout = Task.Run(() =>
         {
@@ -194,14 +196,13 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    /// <param name="message"></param>
-    /// <returns></returns>
-    /// <exception cref="InvalidDataException"></exception>
-    public async Task SendAsync(IPEndPoint point, AppMessage message)
+        /// <summary>
+        /// Sends an AppMessage to the specified IP endpoint asynchronously.
+        /// </summary>
+        /// <param name="point">The IP endpoint to send the message to.</param>
+        /// <param name="message">The message to send.</param>
+        /// <exception cref="InvalidDataException">Thrown when the message could not be sent completely.</exception>
+        public async Task SendAsync(IPEndPoint point, AppMessage message)
     {
         try
         {
@@ -221,26 +222,24 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <returns></returns>
-    public async Task SendAsync(IPAddress ip, int port, AppMessage message)
-    {
-        await SendAsync(new IPEndPoint(ip, port), message);
-    }
+        /// <summary>
+        /// Sends an AppMessage to the specified IP address and port asynchronously.
+        /// </summary>
+        /// <param name="ip">The IP address to send the message to.</param>
+        /// <param name="port">The port number to send the message to.</param>
+        /// <param name="message">The message to send.</param>
+        public async Task SendAsync(IPAddress ip, int port, AppMessage message)
+        {
+            await SendAsync(new IPEndPoint(ip, port), message);
+        }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="range"></param>
-    /// <param name="message"></param>
-    /// <returns></returns>
-    public async Task SendAsync(IPAddress ip, PortRange range, AppMessage message)
+        /// <summary>
+        /// Sends an AppMessage to all ports in the specified range on the given IP address asynchronously.
+        /// </summary>
+        /// <param name="ip">The IP address to send the message to.</param>
+        /// <param name="range">The port range to send the message to.</param>
+        /// <param name="message">The message to send.</param>
+        public async Task SendAsync(IPAddress ip, PortRange range, AppMessage message)
     {
         for (int port = range.First; port <= range.Last; port++)
         {
@@ -250,11 +249,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public async Task<LocatedMessage> ReceiveAsync()
+        /// <summary>
+        /// Receives a message asynchronously and returns it with its source location.
+        /// </summary>
+        /// <returns>A LocatedMessage containing the received message and its source IP endpoint, or null if receiving fails.</returns>
+        public async Task<LocatedMessage> ReceiveAsync()
     {
         var result = await Socket.ReceiveAsync();
 
@@ -271,12 +270,12 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="timeoutMilliseconds"></param>
-    /// <returns></returns>
-    public async Task<LocatedMessage> ReceiveAsync(int timeoutMilliseconds)
+        /// <summary>
+        /// Receives a message asynchronously with a timeout, returning it with its source location.
+        /// </summary>
+        /// <param name="timeoutMilliseconds">The timeout in milliseconds.</param>
+        /// <returns>A LocatedMessage containing the received message and its source IP endpoint, or null if timeout occurs or receiving fails.</returns>
+        public async Task<LocatedMessage> ReceiveAsync(int timeoutMilliseconds)
     {
         Task timeout = Task.Run(async () =>
         {

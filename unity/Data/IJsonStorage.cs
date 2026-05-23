@@ -33,14 +33,28 @@ using UnityEngine;
 
 namespace Michitai.Lan.Data
 {
-            public interface IJsonStorage
-{
-    string Json { get; set; }
+    /// <summary>
+    /// Interface for JSON storage operations, providing serialization and deserialization capabilities.
+    /// </summary>
+    public interface IJsonStorage
+    {
+        /// <summary>
+        /// Gets or sets the JSON string representation of the stored data.
+        /// </summary>
+        string Json { get; set; }
 
+        /// <summary>
+        /// Deserializes the JSON string into an object of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize into.</typeparam>
+        /// <returns>The deserialized object of type T.</returns>
+        T Get<T>();
 
-
-    T Get<T>();
-
-    void Set<T>(T @object);
-}
+        /// <summary>
+        /// Serializes the specified object to JSON and stores it.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to serialize.</typeparam>
+        /// <param name="@object">The object to serialize to JSON.</param>
+        void Set<T>(T @object);
+    }
 }

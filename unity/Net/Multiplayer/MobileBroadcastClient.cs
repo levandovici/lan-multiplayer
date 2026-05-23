@@ -33,19 +33,29 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public class MobileBroadcastClient
-{
-    private UdpClient _client = null;
+    /// <summary>
+    /// Provides UDP broadcast client functionality for mobile devices to discover servers.
+    /// </summary>
+    public class MobileBroadcastClient
+    {
+        private UdpClient _client = null;
 
-    private CancellationTokenSource _source = null;
+        private CancellationTokenSource _source = null;
 
-    private Task _sender = null;
+        private Task _sender = null;
 
-    private Task _receiver = null;
+        private Task _receiver = null;
 
-
-
-    public void Start(int clientPort, int serverPort, byte[] request, int sendDelayMilliseconds, int receiveDelayMilliseconds, Action<IPEndPoint, byte[]> onReceive)
+        /// <summary>
+        /// Starts the mobile broadcast client for sending requests and receiving responses.
+        /// </summary>
+        /// <param name="clientPort">The port to bind the client to.</param>
+        /// <param name="serverPort">The port to send broadcast requests to.</param>
+        /// <param name="request">The request data to broadcast.</param>
+        /// <param name="sendDelayMilliseconds">Delay between sending requests.</param>
+        /// <param name="receiveDelayMilliseconds">Delay between receiving responses.</param>
+        /// <param name="onReceive">Callback invoked when a response is received.</param>
+        public void Start(int clientPort, int serverPort, byte[] request, int sendDelayMilliseconds, int receiveDelayMilliseconds, Action<IPEndPoint, byte[]> onReceive)
     {
         if (_client != null || _source != null || _sender != null || _receiver != null)
             return;
@@ -96,7 +106,10 @@ namespace Michitai.Lan.Net.Multiplayer
         }, token);
     }
 
-    public void Stop()
+        /// <summary>
+        /// Stops the mobile broadcast client and cleans up resources.
+        /// </summary>
+        public void Stop()
     {
         _source?.Cancel();
 

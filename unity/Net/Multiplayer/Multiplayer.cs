@@ -33,142 +33,144 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public static class Multiplayer
-{
     /// <summary>
-    /// 
+    /// Static class providing centralized multiplayer management for servers, clients, and broadcast discovery.
     /// </summary>
-    public static string Name = "New Multiplayer Game";
+    public static class Multiplayer
+    {
+        /// <summary>
+        /// The name of the multiplayer game.
+        /// </summary>
+        public static string Name = "New Multiplayer Game";
 
-    /// <summary>
-    /// The IP address to which the server or/and client will connect
-    /// </summary>
-    public static IPAddress IpAddress = IPAddress.Any;
+        /// <summary>
+        /// The IP address to which the server or/and client will connect.
+        /// </summary>
+        public static IPAddress IpAddress = IPAddress.Any;
 
-    /// <summary>
-    /// The port to which the client will connect
-    /// </summary>
-    public static int Port = 50000;
+        /// <summary>
+        /// The port to which the client will connect.
+        /// </summary>
+        public static int Port = 50000;
 
+        /// <summary>
+        /// Port range. One of them will be used by the server. Default 50000-50128.
+        /// </summary>
+        public static PortRange ServerPortRange = new PortRange(50000, 50128);
 
-    /// <summary>
-    /// Port range. One of them will be used by the server. Default 50000-50128
-    /// </summary>
-    public static PortRange ServerPortRange = new PortRange(50000, 50128);
+        /// <summary>
+        /// Port range. Used by Server and Client to Response and Request UDP Messages. Default 60000-60128.
+        /// </summary>
+        public static PortRange BroadcastPortRange = new PortRange(60000, 60128);
 
-    /// <summary>
-    /// Port range. Used by Server and Client to Response and Request UDP Messages. Default 60000-60128
-    /// </summary>
-    public static PortRange BroadcastPortRange = new PortRange(60000, 60128);
+        /// <summary>
+        /// Mobile broadcast server port.
+        /// </summary>
+        public static int MobileBroadcastServerPort = 49001;
 
-    public static int MobileBroadcastServerPort = 49001;
+        /// <summary>
+        /// Mobile broadcast client port.
+        /// </summary>
+        public static int MobileBroadcastClientPort = 49002;
 
-    public static int MobileBroadcastClientPort = 49002;
+        /// <summary>
+        /// The active server instance.
+        /// </summary>
+        public static Server Server = null;
 
+        /// <summary>
+        /// The active client instance.
+        /// </summary>
+        public static Client Client = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static Server Server = null;
+        /// <summary>
+        /// The active broadcast server instance.
+        /// </summary>
+        public static BroadcastServer BroadcastServer = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static Client Client = null;
+        /// <summary>
+        /// The broadcast server task for asynchronous operations.
+        /// </summary>
+        private static Task _BroadcastServerTask = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static BroadcastServer BroadcastServer = null;
+        /// <summary>
+        /// Cancellation token source for the broadcast server task.
+        /// </summary>
+        private static CancellationTokenSource _BroadcastServerTaskTokenSource = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static Task _BroadcastServerTask = null;
+        /// <summary>
+        /// The active broadcast client instance.
+        /// </summary>
+        public static BroadcastClient BroadcastClient = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static CancellationTokenSource _BroadcastServerTaskTokenSource = null;
+        /// <summary>
+        /// The broadcast client task for asynchronous operations.
+        /// </summary>
+        private static Task _BroadcastClientTask = null;
 
+        /// <summary>
+        /// Cancellation token source for the broadcast client task.
+        /// </summary>
+        private static CancellationTokenSource _BroadcastClientTaskTokenSource = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static BroadcastClient BroadcastClient = null;
+        /// <summary>
+        /// The mobile broadcast client instance.
+        /// </summary>
+        private static MobileBroadcastClient _MobileBroadcastClient = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static Task _BroadcastClientTask = null;
+        /// <summary>
+        /// The mobile broadcast server instance.
+        /// </summary>
+        private static MobileBroadcastServer _MobileBroadcastServer = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static CancellationTokenSource _BroadcastClientTaskTokenSource = null;
+        /// <summary>
+        /// Queue of client commands to be processed.
+        /// </summary>
+        public static Queue<Command> ClientCommands = new Queue<Command>();
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static MobileBroadcastClient _MobileBroadcastClient = null;
+        /// <summary>
+        /// Number of requests that can be sent at the same time.
+        /// </summary>
+        public static int ClientOnceMaxCommands = 4;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static MobileBroadcastServer _MobileBroadcastServer = null;
+        /// <summary>
+        /// Gets whether this instance is running as a server.
+        /// </summary>
+        public static bool IsServer => Server != null;
 
+        /// <summary>
+        /// Gets whether this instance is running as a client.
+        /// </summary>
+        public static bool IsClient => Client != null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static Queue<Command> ClientCommands = new Queue<Command>();
+        /// <summary>
+        /// Event raised when starting the server.
+        /// </summary>
+        public static event Action OnStartServer;
 
-    /// <summary>
-    /// Number of requests that can be sent at the same time.
-    /// </summary>
-    public static int ClientOnceMaxCommands = 4;
+        /// <summary>
+        /// Event raised when starting the client.
+        /// </summary>
+        public static event Action OnStartClient;
 
+        /// <summary>
+        /// Event raised when the client has started.
+        /// </summary>
+        public static event Action OnClientStarted;
 
+        /// <summary>
+        /// Event raised when the server has started.
+        /// </summary>
+        public static event Action OnServerStarted;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool IsServer => Server != null;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static bool IsClient => Client != null;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static event Action OnStartServer;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static event Action OnStartClient;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static event Action OnClientStarted;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static event Action OnServerStarted;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="serverGameData"></param>
-    public static void StartServer(EPlatform platform, ServerGameData serverGameData, BroadcastServer.ProcessMessageDelegate processMessage, int receiveRequestsDelayMilliseconds = 500)
+        /// <summary>
+        /// Starts the multiplayer server with the specified game data and broadcast message processor.
+        /// </summary>
+        /// <param name="platform">The platform the server is running on.</param>
+        /// <param name="serverGameData">The server's game data.</param>
+        /// <param name="processMessage">Delegate for processing broadcast messages.</param>
+        /// <param name="receiveRequestsDelayMilliseconds">Delay between receiving broadcast requests.</param>
+        public static void StartServer(EPlatform platform, ServerGameData serverGameData, BroadcastServer.ProcessMessageDelegate processMessage, int receiveRequestsDelayMilliseconds = 500)
     {
         if (IsServer)
             return;
@@ -244,10 +246,10 @@ namespace Michitai.Lan.Net.Multiplayer
         OnServerStarted?.Invoke();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static void StartClient()
+        /// <summary>
+        /// Starts the multiplayer client and connects to the server.
+        /// </summary>
+        public static void StartClient()
     {
         if (IsClient)
             return;
@@ -267,10 +269,10 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static void StopServer()
+        /// <summary>
+        /// Stops the multiplayer server and all associated services.
+        /// </summary>
+        public static void StopServer()
     {
         DebugConsole.LogWarning("[MULTIPLAYER] Cancelling BroadcastServerTask...");
 
@@ -306,30 +308,30 @@ namespace Michitai.Lan.Net.Multiplayer
         _MobileBroadcastServer = null;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static void StopClient()
+        /// <summary>
+        /// Stops the multiplayer client.
+        /// </summary>
+        public static void StopClient()
     {
         Client?.Stop();
 
         Client = null;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static void Stop()
+        /// <summary>
+        /// Stops all multiplayer services (both client and server).
+        /// </summary>
+        public static void Stop()
     {
         StopClient();
 
         StopServer();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static void ClearEvents()
+        /// <summary>
+        /// Clears all event handlers.
+        /// </summary>
+        public static void ClearEvents()
     {
         OnStartServer = null;
 
@@ -342,10 +344,15 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static void StartBroadcastClient(EPlatform platform, AppMessage request, BroadcastClient.OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds = 5000, int repeatAfterMilliseconds = 5000)
+        /// <summary>
+        /// Starts the broadcast client for discovering servers on the network.
+        /// </summary>
+        /// <param name="platform">The platform the client is running on.</param>
+        /// <param name="request">The broadcast request message to send.</param>
+        /// <param name="onReceiveResponse">Callback for handling received responses.</param>
+        /// <param name="receiveResponsesMilliseconds">Duration to receive responses.</param>
+        /// <param name="repeatAfterMilliseconds">Interval between broadcast requests.</param>
+        public static void StartBroadcastClient(EPlatform platform, AppMessage request, BroadcastClient.OnReceiveResponseDelegate onReceiveResponse, int receiveResponsesMilliseconds = 5000, int repeatAfterMilliseconds = 5000)
     {
         if (_BroadcastClientTask != null)
             return;
@@ -414,10 +421,10 @@ namespace Michitai.Lan.Net.Multiplayer
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static void StopBroadcastClient()
+        /// <summary>
+        /// Stops the broadcast client.
+        /// </summary>
+        public static void StopBroadcastClient()
     {
         _BroadcastClientTaskTokenSource?.Cancel();
 

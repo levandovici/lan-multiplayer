@@ -33,27 +33,28 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public sealed class ServerGameData : IJsonStorage
-{
-    public string serverID;
-
-    public ServerClientGameData[] clients;
-
-    public string json;
-
-
-    private readonly object _server_id_lock;
-
-    private readonly object _clients_lock;
-
-    private readonly object _json_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Represents game data for a multiplayer server, including all connected clients.
+    /// Implements IJsonStorage for JSON serialization.
     /// </summary>
-    public string ServerID
+    public sealed class ServerGameData : IJsonStorage
+    {
+        public string serverID;
+
+        public ServerClientGameData[] clients;
+
+        public string json;
+
+        private readonly object _server_id_lock;
+
+        private readonly object _clients_lock;
+
+        private readonly object _json_lock;
+
+        /// <summary>
+        /// Gets or sets the server ID.
+        /// </summary>
+        public string ServerID
     {
         get
         {
@@ -72,10 +73,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerClientGameData[] Clients
+        /// <summary>
+        /// Gets or sets the array of connected client game data.
+        /// </summary>
+        public ServerClientGameData[] Clients
     {
         get
         {
@@ -94,7 +95,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public string Json
+        /// <summary>
+        /// Gets or sets the JSON string representation of the server data.
+        /// </summary>
+        public string Json
     {
         get
         {
@@ -115,10 +119,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerGameData Public
+        /// <summary>
+        /// Gets a public version of the server data with only public client data.
+        /// </summary>
+        public ServerGameData Public
     {
         get
         {
@@ -142,12 +146,12 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="server_id"></param>
-    /// <param name="clients"></param>
-    public ServerGameData(string server_id, ServerClientGameData[] clients)
+        /// <summary>
+        /// Initializes a new instance of ServerGameData with the specified server ID and clients.
+        /// </summary>
+        /// <param name="server_id">The server ID.</param>
+        /// <param name="clients">The array of connected client game data.</param>
+        public ServerGameData(string server_id, ServerClientGameData[] clients)
     {
         serverID = server_id;
 
@@ -163,18 +167,18 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         _json_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="server_id"></param>
-    public ServerGameData(string server_id) : this(server_id, new ServerClientGameData[0])
+        /// <summary>
+        /// Initializes a new instance of ServerGameData with the specified server ID and no clients.
+        /// </summary>
+        /// <param name="server_id">The server ID.</param>
+        public ServerGameData(string server_id) : this(server_id, new ServerClientGameData[0])
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerGameData()
+        /// <summary>
+        /// Initializes a new instance of ServerGameData with default values.
+        /// </summary>
+        public ServerGameData()
     {
         serverID = "default";
 
@@ -192,11 +196,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="player"></param>
-    public void AddPlayer(ServerClientGameData player)
+        /// <summary>
+        /// Adds a player to the server data.
+        /// </summary>
+        /// <param name="player">The player's game data to add.</param>
+        public void AddPlayer(ServerClientGameData player)
     {
         lock (_clients_lock)
         {
@@ -213,11 +217,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="player"></param>
-    public void DeletePlayer(Credentials player)
+        /// <summary>
+        /// Deletes a player from the server data by credentials.
+        /// </summary>
+        /// <param name="player">The credentials of the player to delete.</param>
+        public void DeletePlayer(Credentials player)
     {
         lock (_clients_lock)
         {
@@ -235,12 +239,12 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="player"></param>
-    /// <returns></returns>
-    public bool Contains(Credentials player)
+        /// <summary>
+        /// Checks if the server contains a player with the specified credentials.
+        /// </summary>
+        /// <param name="player">The player's credentials.</param>
+        /// <returns>True if the player exists; otherwise, false.</returns>
+        public bool Contains(Credentials player)
     {
         lock (_clients_lock)
         {
@@ -258,13 +262,13 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="client"></param>
-    /// <returns></returns>
-    public bool TryGetPublicPlayerData(Credentials player, out ServerClientGameData client)
+        /// <summary>
+        /// Attempts to get the public game data of a player by credentials.
+        /// </summary>
+        /// <param name="player">The player's credentials.</param>
+        /// <param name="client">When this method returns, contains the player's public data if successful.</param>
+        /// <returns>True if the player was found; otherwise, false.</returns>
+        public bool TryGetPublicPlayerData(Credentials player, out ServerClientGameData client)
     {
         lock (_clients_lock)
         {
@@ -285,13 +289,13 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         return false;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="player"></param>
-    /// <param name="client"></param>
-    /// <returns></returns>
-    public bool TryGetPrivatePlayerData(Credentials player, out ServerClientGameData client)
+        /// <summary>
+        /// Attempts to get the private game data of a player by credentials.
+        /// </summary>
+        /// <param name="player">The player's credentials.</param>
+        /// <param name="client">When this method returns, contains the player's private data if successful.</param>
+        /// <returns>True if the player was found; otherwise, false.</returns>
+        public bool TryGetPrivatePlayerData(Credentials player, out ServerClientGameData client)
     {
         lock (_clients_lock)
         {
@@ -314,23 +318,33 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    public T Get<T>()
+        /// <summary>
+        /// Gets the JSON data deserialized to the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize to.</typeparam>
+        /// <returns>The deserialized object.</returns>
+        public T Get<T>()
     {
         return JsonUtility.FromJson<T>(Json);
     }
 
-    public void Set<T>(T @object)
+        /// <summary>
+        /// Sets the JSON data by serializing the specified object.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to serialize.</typeparam>
+        /// <param name="@object">The object to serialize.</param>
+        public void Set<T>(T @object)
     {
         Json = JsonUtility.ToJson(@object);
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString()
+        /// <summary>
+        /// Returns a string representation of the server game data.
+        /// </summary>
+        /// <returns>A string containing the server ID and player count.</returns>
+        public override string ToString()
     {
         return $"[SERVER-GAME-DATA][SERVER-ID][{serverID}][PLAYERS][{clients.Length}]";
     }

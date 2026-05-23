@@ -33,20 +33,23 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public class LocatedServerInfoStack
-{
-    public Stack<LocatedServerInfo> _stack;
+    /// <summary>
+    /// Thread-safe stack for managing discovered server information.
+    /// </summary>
+    public class LocatedServerInfoStack
+    {
+        public Stack<LocatedServerInfo> _stack;
 
-    public int _count;
+        public int _count;
 
+        private object _stack_lock;
 
-    private object _stack_lock;
+        private object _count_lock;
 
-    private object _count_lock;
-
-
-
-    public LocatedServerInfoStack()
+        /// <summary>
+        /// Initializes a new instance of LocatedServerInfoStack.
+        /// </summary>
+        public LocatedServerInfoStack()
     {
         _stack = new Stack<LocatedServerInfo>();
 
@@ -60,7 +63,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    public void Push(LocatedServerInfo locatedServerInfo)
+        /// <summary>
+        /// Pushes a server info onto the stack.
+        /// </summary>
+        /// <param name="locatedServerInfo">The server info to push.</param>
+        public void Push(LocatedServerInfo locatedServerInfo)
     {
         lock (_stack_lock)
         {
@@ -73,7 +80,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public LocatedServerInfo Pop()
+        /// <summary>
+        /// Pops a server info from the stack.
+        /// </summary>
+        /// <returns>The server info at the top of the stack.</returns>
+        public LocatedServerInfo Pop()
     {
         lock (_stack_lock)
         {
@@ -86,7 +97,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public LocatedServerInfo Peek()
+        /// <summary>
+        /// Peeks at the server info at the top of the stack without removing it.
+        /// </summary>
+        /// <returns>The server info at the top of the stack.</returns>
+        public LocatedServerInfo Peek()
     {
         lock (_stack_lock)
         {
@@ -94,7 +109,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public int Count()
+        /// <summary>
+        /// Gets the number of items in the stack.
+        /// </summary>
+        /// <returns>The count of items in the stack.</returns>
+        public int Count()
     {
         lock (_count_lock)
         {
@@ -102,7 +121,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public void Clear()
+        /// <summary>
+        /// Clears all items from the stack.
+        /// </summary>
+        public void Clear()
     {
         lock (_stack_lock)
         {

@@ -33,9 +33,16 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public sealed class Credentials
-{
-    public static Credentials New()
+    /// <summary>
+    /// Represents authentication credentials for a player, consisting of an ID and password.
+    /// </summary>
+    public sealed class Credentials
+    {
+        /// <summary>
+        /// Creates a new instance of Credentials with randomly generated ID and password.
+        /// </summary>
+        /// <returns>A new Credentials instance.</returns>
+        public static Credentials New()
     {
         return new Credentials(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
     }
@@ -53,10 +60,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public string ID
+        /// <summary>
+        /// Gets or sets the credential ID.
+        /// </summary>
+        public string ID
     {
         get
         {
@@ -75,10 +82,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public string Password
+        /// <summary>
+        /// Gets or sets the credential password.
+        /// </summary>
+        public string Password
     {
         get
         {
@@ -97,19 +104,19 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Credentials Public => new Credentials(ID);
+        /// <summary>
+        /// Gets a public version of these credentials (ID only, no password).
+        /// </summary>
+        public Credentials Public => new Credentials(ID);
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="password"></param>
-    public Credentials(string id, string password)
+        /// <summary>
+        /// Initializes a new instance of Credentials with the specified ID and password.
+        /// </summary>
+        /// <param name="id">The credential ID.</param>
+        /// <param name="password">The credential password.</param>
+        public Credentials(string id, string password)
     {
         _id = id;
 
@@ -121,18 +128,18 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         _password_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    public Credentials(string id) : this(id, "")
+        /// <summary>
+        /// Initializes a new instance of Credentials with the specified ID and an empty password.
+        /// </summary>
+        /// <param name="id">The credential ID.</param>
+        public Credentials(string id) : this(id, "")
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Credentials()
+        /// <summary>
+        /// Initializes a new instance of Credentials with default values.
+        /// </summary>
+        public Credentials()
     {
         _id = "id";
 
@@ -146,23 +153,23 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString()
+        /// <summary>
+        /// Returns a string representation of the credentials.
+        /// </summary>
+        /// <returns>A string containing the ID and password.</returns>
+        public override string ToString()
     {
         return $"[CREDENTIALS][ID][{_id}][PASSWORD][{_password}]";
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="obj"></param>
-    /// <returns></returns>
-    public override bool Equals(object obj)
+        /// <summary>
+        /// Determines whether the specified object is equal to the current credentials.
+        /// </summary>
+        /// <param name="obj">The object to compare.</param>
+        /// <returns>True if the objects are equal; otherwise, false.</returns>
+        public override bool Equals(object obj)
     {
         if ((obj == null) || !this.GetType().Equals(obj.GetType()))
         {
@@ -176,33 +183,33 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override int GetHashCode()
+        /// <summary>
+        /// Returns a hash code for the current credentials.
+        /// </summary>
+        /// <returns>A hash code based on the ID and password.</returns>
+        public override int GetHashCode()
     {
         return $"{ID}{Password}".GetHashCode();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="A"></param>
-    /// <param name="B"></param>
-    /// <returns></returns>
-    public static bool operator ==(Credentials A, Credentials B)
+        /// <summary>
+        /// Determines whether two credentials are equal.
+        /// </summary>
+        /// <param name="A">The first credentials.</param>
+        /// <param name="B">The second credentials.</param>
+        /// <returns>True if the credentials are equal; otherwise, false.</returns>
+        public static bool operator ==(Credentials A, Credentials B)
     {
         return A.Equals(B);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="A"></param>
-    /// <param name="B"></param>
-    /// <returns></returns>
-    public static bool operator !=(Credentials A, Credentials B)
+        /// <summary>
+        /// Determines whether two credentials are not equal.
+        /// </summary>
+        /// <param name="A">The first credentials.</param>
+        /// <param name="B">The second credentials.</param>
+        /// <returns>True if the credentials are not equal; otherwise, false.</returns>
+        public static bool operator !=(Credentials A, Credentials B)
     {
         return !A.Equals(B);
     }

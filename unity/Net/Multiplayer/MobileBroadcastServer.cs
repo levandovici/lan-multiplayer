@@ -33,17 +33,25 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public class MobileBroadcastServer
-{
-    private UdpClient _server = null;
+    /// <summary>
+    /// Provides UDP broadcast server functionality for mobile devices to respond to client discovery requests.
+    /// </summary>
+    public class MobileBroadcastServer
+    {
+        private UdpClient _server = null;
 
-    private CancellationTokenSource _source = null;
+        private CancellationTokenSource _source = null;
 
-    private Task _task = null;
+        private Task _task = null;
 
-
-
-    public void Start(int clientPort, int serverPort, int delayMilliseconds, Func<IPEndPoint, byte[], byte[]> onReceive)
+        /// <summary>
+        /// Starts the mobile broadcast server for receiving requests and sending responses.
+        /// </summary>
+        /// <param name="clientPort">The expected client port for receiving requests.</param>
+        /// <param name="serverPort">The port to bind the server to.</param>
+        /// <param name="delayMilliseconds">Delay between processing requests.</param>
+        /// <param name="onReceive">Delegate to process incoming requests and generate responses.</param>
+        public void Start(int clientPort, int serverPort, int delayMilliseconds, Func<IPEndPoint, byte[], byte[]> onReceive)
     {
         if (_server != null || _source != null || _task != null)
             return;
@@ -102,7 +110,10 @@ namespace Michitai.Lan.Net.Multiplayer
         }, token);
     }
 
-    public void Stop()
+        /// <summary>
+        /// Stops the mobile broadcast server and cleans up resources.
+        /// </summary>
+        public void Stop()
     {
         _source?.Cancel();
 

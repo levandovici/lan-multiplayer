@@ -33,20 +33,23 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public class LocatedServerInfo
-{
-    public ServerInfo _server_info;
+    /// <summary>
+    /// Represents a discovered server with its information and network location.
+    /// </summary>
+    public class LocatedServerInfo
+    {
+        public ServerInfo _server_info;
 
-    public IPEndPoint _point;
+        public IPEndPoint _point;
 
+        private readonly object _server_info_lock;
 
-    private readonly object _server_info_lock;
+        private readonly object _point_lock;
 
-    private readonly object _point_lock;
-
-
-
-    public ServerInfo ServerInfo
+        /// <summary>
+        /// Gets or sets the server information.
+        /// </summary>
+        public ServerInfo ServerInfo
     {
         get
         {
@@ -65,7 +68,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public IPEndPoint IPEndPoint
+        /// <summary>
+        /// Gets or sets the IP endpoint of the server.
+        /// </summary>
+        public IPEndPoint IPEndPoint
     {
         get
         {
@@ -86,12 +92,12 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="serverInfo"></param>
-    /// <param name="point"></param>
-    public LocatedServerInfo(ServerInfo serverInfo, IPEndPoint point)
+        /// <summary>
+        /// Initializes a new instance of LocatedServerInfo with the specified server information and IP endpoint.
+        /// </summary>
+        /// <param name="serverInfo">The server information.</param>
+        /// <param name="point">The IP endpoint of the server.</param>
+        public LocatedServerInfo(ServerInfo serverInfo, IPEndPoint point)
     {
         _server_info = serverInfo;
 
@@ -103,10 +109,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         _point_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public LocatedServerInfo()
+        /// <summary>
+        /// Initializes a new instance of LocatedServerInfo with null values.
+        /// </summary>
+        public LocatedServerInfo()
     {
         _server_info = null;
 

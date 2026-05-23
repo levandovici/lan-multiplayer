@@ -33,18 +33,19 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Commands
 {
-            public sealed class Terminal
-{
-    public Command[] commands;
-
-    private object _commands_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a terminal for chaining multiple commands together.
     /// </summary>
-    public Command[] Commands
+    public sealed class Terminal
+    {
+        public Command[] commands;
+
+        private object _commands_lock;
+
+        /// <summary>
+        /// Gets or sets the array of commands in the terminal.
+        /// </summary>
+        public Command[] Commands
     {
         get
         {
@@ -65,10 +66,10 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Terminal()
+        /// <summary>
+        /// Initializes a new instance of Terminal with no commands.
+        /// </summary>
+        public Terminal()
     {
         commands = new Command[0];
 
@@ -77,12 +78,12 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="argument"></param>
-    /// <returns></returns>
-    public Terminal Arg(string argument)
+        /// <summary>
+        /// Adds an argument to the last command in the terminal.
+        /// </summary>
+        /// <param name="argument">The argument to add.</param>
+        /// <returns>This terminal instance for method chaining.</returns>
+        public Terminal Arg(string argument)
     {
         lock (_commands_lock)
         {
@@ -92,22 +93,22 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
         return this;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    public Terminal Next(string command)
+        /// <summary>
+        /// Adds a new command to the terminal from a string.
+        /// </summary>
+        /// <param name="command">The command string to add.</param>
+        /// <returns>This terminal instance for method chaining.</returns>
+        public Terminal Next(string command)
     {
         return Next(Command.New(command));
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    public Terminal Next(Command command)
+        /// <summary>
+        /// Adds a new command to the terminal.
+        /// </summary>
+        /// <param name="command">The command to add.</param>
+        /// <returns>This terminal instance for method chaining.</returns>
+        public Terminal Next(Command command)
     {
         lock (_commands_lock)
         {
@@ -128,21 +129,21 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public static Terminal New()
+        /// <summary>
+        /// Creates a new empty terminal.
+        /// </summary>
+        /// <returns>A new Terminal instance.</returns>
+        public static Terminal New()
     {
         return new Terminal();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    public static Terminal New(string command)
+        /// <summary>
+        /// Creates a new terminal with the specified command.
+        /// </summary>
+        /// <param name="command">The command to add to the terminal.</param>
+        /// <returns>A new Terminal instance with the command.</returns>
+        public static Terminal New(string command)
     {
         return New().Next(command);
     }

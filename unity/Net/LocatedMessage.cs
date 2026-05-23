@@ -33,69 +33,72 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class LocatedMessage
-{
-    private IPEndPoint _point;
-
-    private AppMessage _message;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a message that includes its network location (IP endpoint).
     /// </summary>
-    public IPEndPoint IPEndPoint
+    public sealed class LocatedMessage
     {
-        get
+        private IPEndPoint _point;
+
+        private AppMessage _message;
+
+
+
+        /// <summary>
+        /// Gets or sets the IP endpoint where the message originated or is destined.
+        /// </summary>
+        public IPEndPoint IPEndPoint
         {
-            return _point;
+            get
+            {
+                return _point;
+            }
+
+            set
+            {
+                _point = value;
+            }
         }
 
-        set
+        /// <summary>
+        /// Gets or sets the application message content.
+        /// </summary>
+        public AppMessage Message
         {
-            _point = value;
-        }
-    }
+            get
+            {
+                return _message;
+            }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public AppMessage Message
-    {
-        get
+            set
+            {
+                _message = value;
+            }
+        }
+
+
+
+        /// <summary>
+        /// Initializes a new instance of LocatedMessage with the specified IP endpoint and message.
+        /// </summary>
+        /// <param name="point">The IP endpoint associated with the message.</param>
+        /// <param name="message">The application message content.</param>
+        public LocatedMessage(IPEndPoint point, AppMessage message)
         {
-            return _message;
+            _point = point;
+
+            _message = message;
         }
 
-        set
+
+
+        /// <summary>
+        /// Returns a string representation of the located message.
+        /// </summary>
+        /// <returns>A string containing the IP endpoint and message content.</returns>
+        public override string ToString()
         {
-            _message = value;
+            return $"IP End Point: {IPEndPoint}\t App Message: {Message}";
         }
-    }
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    /// <param name="message"></param>
-    public LocatedMessage(IPEndPoint point, AppMessage message)
-    {
-        _point = point;
-
-        _message = message;
-    }
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString()
-    {
-        return $"IP End Point: {IPEndPoint}\t App Message: {Message}";
-    }
 }
 }

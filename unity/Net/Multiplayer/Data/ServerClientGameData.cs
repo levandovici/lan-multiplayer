@@ -33,23 +33,23 @@ using UnityEngine;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public sealed class ServerClientGameData
-{
-    public JsonStorage data;
-
-    public Credentials credentials;
-
-
-    private readonly object _data_lock;
-
-    private readonly object _credentials_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Represents game data for a specific client connected to the server.
     /// </summary>
-    public JsonStorage Data
+    public sealed class ServerClientGameData
+    {
+        public JsonStorage data;
+
+        public Credentials credentials;
+
+        private readonly object _data_lock;
+
+        private readonly object _credentials_lock;
+
+        /// <summary>
+        /// Gets or sets the client's game data storage.
+        /// </summary>
+        public JsonStorage Data
     {
         get
         {
@@ -68,10 +68,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Credentials Credentials
+        /// <summary>
+        /// Gets or sets the client's credentials.
+        /// </summary>
+        public Credentials Credentials
     {
         get
         {
@@ -90,19 +90,19 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerClientGameData Public => new ServerClientGameData(Data, Credentials.Public);
+        /// <summary>
+        /// Gets a public version of the client data with public credentials.
+        /// </summary>
+        public ServerClientGameData Public => new ServerClientGameData(Data, Credentials.Public);
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="gameData"></param>
-    /// <param name="credentials"></param>
-    public ServerClientGameData(JsonStorage gameData, Credentials credentials)
+        /// <summary>
+        /// Initializes a new instance of ServerClientGameData with the specified game data and credentials.
+        /// </summary>
+        /// <param name="gameData">The client's game data storage.</param>
+        /// <param name="credentials">The client's credentials.</param>
+        public ServerClientGameData(JsonStorage gameData, Credentials credentials)
     {
         data = gameData;
 
@@ -114,10 +114,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         _credentials_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerClientGameData()
+        /// <summary>
+        /// Initializes a new instance of ServerClientGameData with default credentials.
+        /// </summary>
+        public ServerClientGameData()
     {
         credentials = new Credentials("id", "password");
 
@@ -129,11 +129,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString()
+        /// <summary>
+        /// Returns a string representation of the client game data.
+        /// </summary>
+        /// <returns>A string containing the credentials and data.</returns>
+        public override string ToString()
     {
         return $"[SERVER-CLIENT-GAME-DATA]{credentials}{data?.ToString()}";
     }
