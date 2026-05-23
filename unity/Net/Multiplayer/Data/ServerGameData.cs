@@ -37,6 +37,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
     /// Represents game data for a multiplayer server, including all connected clients.
     /// Implements IJsonStorage for JSON serialization.
     /// </summary>
+    [Serializable]
     public sealed class ServerGameData : IJsonStorage
     {
         public string serverID;

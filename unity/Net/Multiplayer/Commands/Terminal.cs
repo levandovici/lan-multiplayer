@@ -36,6 +36,7 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
     /// <summary>
     /// Represents a terminal for chaining multiple commands together.
     /// </summary>
+    [Serializable]
     public sealed class Terminal
     {
         public Command[] commands;

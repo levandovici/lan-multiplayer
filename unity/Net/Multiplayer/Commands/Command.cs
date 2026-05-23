@@ -36,6 +36,7 @@ namespace Michitai.Lan.Net.Multiplayer.Commands
     /// <summary>
     /// Represents a command with arguments for terminal/command-line operations.
     /// </summary>
+    [Serializable]
     public sealed class Command
     {
         public string[] args;

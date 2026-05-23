@@ -36,6 +36,7 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
     /// <summary>
     /// Thread-safe chat container for managing chat messages with a maximum length limit.
     /// </summary>
+    [Serializable]
     public sealed class Chat
     {
         private Letter[] _letters;

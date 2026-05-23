@@ -36,6 +36,7 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
     /// <summary>
     /// Represents a single chat message with an ID and content.
     /// </summary>
+    [Serializable]
     public sealed class Letter
     {
         private string _id;

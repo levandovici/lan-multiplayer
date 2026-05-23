@@ -36,6 +36,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
     /// <summary>
     /// Represents information about a multiplayer server including name, ID, port, and client count.
     /// </summary>
+    [Serializable]
     public class ServerInfo
     {
         public int _port;

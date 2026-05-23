@@ -36,6 +36,7 @@ namespace Michitai.Lan.Data
     /// <summary>
     /// Thread-safe implementation of JSON storage using Unity's JsonUtility for serialization.
     /// </summary>
+    [Serializable]
     public sealed class JsonStorage : IJsonStorage
     {
         /// <summary>

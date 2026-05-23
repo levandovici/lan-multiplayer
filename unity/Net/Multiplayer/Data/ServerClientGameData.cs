@@ -36,6 +36,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
     /// <summary>
     /// Represents game data for a specific client connected to the server.
     /// </summary>
+    [Serializable]
     public sealed class ServerClientGameData
     {
         public JsonStorage data;
