@@ -66,6 +66,91 @@ require_once 'config.php';
                 </div>
             </section>
 
+            <section class="examples">
+                <h2>📝 Quick Examples</h2>
+                
+                <div class="example-card">
+                    <h3>1. Server Discovery</h3>
+                    <p>Automatically discover LAN servers using UDP broadcast:</p>
+                    <pre class="code-block">// Start broadcast discovery
+Multiplayer.StartBroadcastClient(
+    platform: EPlatform.Standalone,
+    request: new AppMessage(1, "my-game", JsonUtility.ToJson(Command.New("discover"))),
+    onReceiveResponse: (LocatedMessage response) => {
+        ServerInfo serverInfo = JsonUtility.FromJson<ServerInfo>(response.Message.Message);
+        Console.WriteLine($"Found server: {serverInfo.Name} at {response.IPEndPoint}");
+    },
+    receiveResponsesMilliseconds: 5000,
+    repeatAfterMilliseconds: 5000
+);</pre>
+                </div>
+
+                <div class="example-card">
+                    <h3>2. Start a Server</h3>
+                    <p>Create and start a multiplayer server:</p>
+                    <pre class="code-block">// Configure server
+Multiplayer.Name = "My Game Server";
+Multiplayer.IpAddress = Lan.LocalIPv4Addresses(EPlatform.Standalone)[0];
+
+// Start server with game data
+Multiplayer.StartServer(
+    platform: EPlatform.Standalone,
+    serverGameData: new ServerGameData(Guid.NewGuid().ToString()),
+    processMessage: (LocatedMessage msg) => {
+        // Handle discovery requests
+        return new AppMessage(1, "my-game", JsonUtility.ToJson(Command.New("server-info")));
+    },
+    receiveRequestsDelayMilliseconds: 500
+);</pre>
+                </div>
+
+                <div class="example-card">
+                    <h3>3. Connect as Client</h3>
+                    <p>Connect to a discovered server:</p>
+                    <pre class="code-block">// Set connection parameters
+Multiplayer.IpAddress = serverIpAddress;
+Multiplayer.Port = serverPort;
+
+// Start client
+Multiplayer.StartClient();
+
+// Handle responses
+Multiplayer.Client.OnResponse += (message) => {
+    Terminal terminal = JsonUtility.FromJson<Terminal>(message.GetMessage);
+    // Process server response
+};</pre>
+                </div>
+
+                <div class="example-card">
+                    <h3>4. Send Game Data</h3>
+                    <p>Synchronize game state with server:</p>
+                    <pre class="code-block">// Create command with game data
+Terminal commands = Terminal.New()
+    .Next("set-game-data").Arg(JsonUtility.ToJson(playerData))
+    .Next("get-server-data");
+
+// Send to server
+if (Multiplayer.Client.CanRequest) {
+    Multiplayer.Client.Request(new Message(JsonUtility.ToJson(commands)));
+}</pre>
+                </div>
+
+                <div class="example-card">
+                    <h3>5. Command Pattern</h3>
+                    <p>Use the terminal command system:</p>
+                    <pre class="code-block">// Create commands with arguments
+Command loginCmd = Command.New("login")
+    .Arg("username")
+    .Arg("password");
+
+// Chain multiple commands
+Terminal terminal = Terminal.New()
+    .Next("login").Arg("user").Arg("pass")
+    .Next("get-data")
+    .Next("set-data").Arg(jsonData);</pre>
+                </div>
+            </section>
+
             <section class="license-info">
                 <h3>📜 Licensing</h3>
                 <p><strong>Free for commercial use with attribution</strong> to lan.michitai.com</p>

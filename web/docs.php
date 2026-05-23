@@ -407,6 +407,404 @@ lock (playerData) {
             </section>
 
             <section class="doc-section">
+                <h2>Usage Examples</h2>
+
+                <h3>Example 1: Complete Server Setup</h3>
+                <p>This example shows how to set up a complete multiplayer server with discovery, player registration, and game state synchronization:</p>
+                <pre class="code-block">// Initialize platform
+#if UNITY_STANDALONE
+    EPlatform platform = EPlatform.Standalone;
+#elif UNITY_ANDROID
+    EPlatform platform = EPlatform.Android;
+#endif
+
+// Configure server
+Multiplayer.Name = "Car Driving Multiplayer";
+IPAddress[] ips = null;
+bool success = Lan.TryGetLocalIPv4Addresses(platform, out ips);
+Multiplayer.IpAddress = success ? ips[0] : IPAddress.Any;
+
+// Create server data
+ServerGameData serverData = new ServerGameData(Guid.NewGuid().ToString());
+
+// Start server with broadcast discovery
+Multiplayer.StartServer(
+    platform: platform,
+    serverGameData: serverData,
+    processMessage: (LocatedMessage msg) => {
+        // Process broadcast discovery requests
+        Command command = JsonUtility.FromJson<Command>(msg.Message.Message);
+        if (msg.Message.Name == "car-driving-multiplayer" && 
+            command == Command.New("get-server-info"))
+        {
+            ServerInfo info = new ServerInfo(
+                Multiplayer.Server.IPEndPoint.Port,
+                Multiplayer.Name,
+                serverData.ServerID,
+                serverData.Clients.Length
+            );
+            return new AppMessage(1, "car-driving-multiplayer", 
+                JsonUtility.ToJson(Command.New("server-info").Arg(JsonUtility.ToJson(info))));
+        }
+        return new AppMessage(1, "car-driving-multiplayer", "denied");
+    },
+    receiveRequestsDelayMilliseconds: 500
+);
+
+// Handle server requests
+Multiplayer.Server.OnRequest += (identifiedMessage) => {
+    Terminal terminal = JsonUtility.FromJson<Terminal>(identifiedMessage.Message.GetMessage);
+    Command[] commands = terminal.Commands;
+    Terminal response_terminal = Terminal.New();
+    
+    foreach (Command cmd in commands)
+    {
+        if (cmd == Command.New("get-server-id"))
+        {
+            response_terminal.Next("server-id")
+                .Arg($"{Multiplayer.Server.PublicServerData.ServerID}");
+        }
+        else if (cmd == Command.New("register"))
+        {
+            JsonStorage data = new JsonStorage(cmd.Arguments[1]);
+            Credentials credentials = Multiplayer.Server.RegisterNewPlayer(data);
+            response_terminal.Next("credentials")
+                .Arg($"{JsonUtility.ToJson(credentials)}");
+        }
+        else if (cmd == Command.New("log-in"))
+        {
+            Credentials credentials = JsonUtility.FromJson<Credentials>(cmd.Arguments[1]);
+            if (Multiplayer.Server.Contains(credentials))
+            {
+                Multiplayer.Server.LogInPlayer(identifiedMessage.ID, credentials);
+                response_terminal.Next("log-in-successful");
+            }
+            else
+            {
+                response_terminal.Next("log-in-error");
+            }
+        }
+        else if (cmd == Command.New("set-game-data"))
+        {
+            bool success = Multiplayer.Server.TryGetLoggedInPlayerPrivateData(
+                identifiedMessage.ID, out ServerClientGameData data);
+            if (success)
+            {
+                data.Data.Json = cmd.Arguments[1];
+            }
+        }
+        else if (cmd == Command.New("get-server-data"))
+        {
+            response_terminal.Next("server-data")
+                .Arg($"{JsonUtility.ToJson(Multiplayer.Server.PublicServerData)}");
+        }
+    }
+    
+    Multiplayer.Server.Response(new IdentifiedMessage(
+        new Message(JsonUtility.ToJson(response_terminal)), 
+        identifiedMessage.ID
+    ));
+};</pre>
+
+                <h3>Example 2: Complete Client Setup</h3>
+                <p>This example shows how to set up a client that discovers servers, connects, and synchronizes game state:</p>
+                <pre class="code-block">// Initialize platform
+#if UNITY_STANDALONE
+    EPlatform platform = EPlatform.Standalone;
+#elif UNITY_ANDROID
+    EPlatform platform = EPlatform.Android;
+#endif
+
+// Start broadcast discovery in main menu
+Multiplayer.StartBroadcastClient(
+    platform: platform,
+    request: new AppMessage(1, "car-driving-multiplayer", 
+        JsonUtility.ToJson(Command.New("get-server-info"))),
+    onReceiveResponse: (LocatedMessage response) => {
+        if (response.Message.Name == "car-driving-multiplayer")
+        {
+            Command command = JsonUtility.FromJson<Command>(response.Message.Message);
+            if (command == Command.New("server-info"))
+            {
+                ServerInfo serverInfo = JsonUtility.FromJson<ServerInfo>(command.Arguments[1]);
+                // Store server info for user selection
+                discoveredServers.Add(new LocatedServerInfo(serverInfo, response.IPEndPoint));
+            }
+        }
+    },
+    receiveResponsesMilliseconds: 5000,
+    repeatAfterMilliseconds: 5000
+);
+
+// User selects server - connect to it
+Multiplayer.IpAddress = selectedServer.IPEndPoint.Address;
+Multiplayer.Port = selectedServer.ServerInfo.Port;
+
+// Start client
+Multiplayer.StartClient();
+
+// Handle responses
+Multiplayer.Client.OnResponse += (message) => {
+    Terminal terminal = JsonUtility.FromJson<Terminal>(message.GetMessage);
+    Command[] commands = terminal.Commands;
+    
+    foreach (Command cmd in commands)
+    {
+        if (cmd == Command.New("server-id"))
+        {
+            server_id = cmd.Arguments[1];
+            // Register with game data
+            GameData data = new GameData(new CharacterData(...));
+            Multiplayer.Client.GameData = new JsonStorage(JsonUtility.ToJson(data));
+            Multiplayer.Client.Request(new Message(
+                JsonUtility.ToJson(Terminal.New("register").Arg(JsonUtility.ToJson(data)))
+            ));
+        }
+        else if (cmd == Command.New("credentials"))
+        {
+            Credentials credentials = JsonUtility.FromJson<Credentials>(cmd.Arguments[1]);
+            Multiplayer.Client.ClientData = new ClientGameData(server_id, credentials);
+            Multiplayer.Client.Request(new Message(
+                JsonUtility.ToJson(Terminal.New("log-in").Arg(JsonUtility.ToJson(credentials)))
+            ));
+        }
+        else if (cmd == Command.New("log-in-successful"))
+        {
+            Multiplayer.Client.Request(new Message(
+                JsonUtility.ToJson(Terminal.New("get-server-data"))
+            ));
+        }
+        else if (cmd == Command.New("server-data"))
+        {
+            ServerGameData server_data = JsonUtility.FromJson<ServerGameData>(cmd.Arguments[1]);
+            Multiplayer.Client.ServerData = server_data;
+            // Update remote players
+            UpdateRemotePlayers(server_data.Clients);
+        }
+    }
+};
+
+// Game loop - send player state
+private void Update()
+{
+    if (Multiplayer.IsClient && Multiplayer.Client.CanRequest)
+    {
+        if (Time.time >= updateRate + lastUpdate)
+        {
+            lastUpdate = Time.time;
+            
+            Terminal commands = Terminal.New()
+                .Next("set-game-data").Arg(JsonUtility.ToJson(new GameData(characterData)))
+                .Next("get-server-data");
+            
+            Multiplayer.Client.Request(new Message(JsonUtility.ToJson(commands)));
+        }
+    }
+}</pre>
+
+                <h3>Example 3: Game Data Serialization</h3>
+                <p>This example shows how to create serializable game data structures:</p>
+                <pre class="code-block">// Define serializable game data classes
+[Serializable]
+public class GameData
+{
+    public CharacterData character_data;
+    public WorldData world_data;
+}
+
+[Serializable]
+public class CharacterData
+{
+    public float position_x;
+    public float position_y;
+    public float position_z;
+    public float rotation_x;
+    public float rotation_y;
+    public float rotation_z;
+    public bool lights_on;
+    public int car_index;
+    // Add more fields as needed
+}
+
+[Serializable]
+public class WorldData
+{
+    public string world_name;
+    public int level_index;
+    // Add world-specific data
+}
+
+// Use JSON storage for serialization
+PlayerGameData playerData = new PlayerGameData();
+playerData.Set(new GameData(characterData, worldData));
+
+// Get JSON string
+string json = playerData.Json;
+
+// Deserialize back
+GameData data = playerData.Get&lt;GameData&gt;();</pre>
+
+                <h3>Example 4: Command Processing Pattern</h3>
+                <p>This example shows the recommended pattern for processing commands on the server:</p>
+                <pre class="code-block">// Server-side command processing
+Multiplayer.Server.OnRequest += (identifiedMessage) => {
+    Terminal terminal = JsonUtility.FromJson&lt;Terminal&gt;(identifiedMessage.Message.GetMessage);
+    Command[] commands = terminal.Commands;
+    Terminal response_terminal = Terminal.New();
+    
+    foreach (Command cmd in commands)
+    {
+        switch (cmd.Arguments[0])
+        {
+            case "/get-server-id":
+                // Return server ID
+                response_terminal.Next("server-id")
+                    .Arg($"{Multiplayer.Server.PublicServerData.ServerID}");
+                break;
+                
+            case "/register":
+                // Register new player
+                JsonStorage data = new JsonStorage(cmd.Arguments[1]);
+                Credentials credentials = Multiplayer.Server.RegisterNewPlayer(data);
+                response_terminal.Next("credentials")
+                    .Arg($"{JsonUtility.ToJson(credentials)}");
+                break;
+                
+            case "/log-in":
+                // Authenticate player
+                Credentials credentials = JsonUtility.FromJson&lt;Credentials&gt;(cmd.Arguments[1]);
+                if (Multiplayer.Server.Contains(credentials))
+                {
+                    Multiplayer.Server.LogInPlayer(identifiedMessage.ID, credentials);
+                    response_terminal.Next("log-in-successful");
+                }
+                else
+                {
+                    response_terminal.Next("log-in-error");
+                }
+                break;
+                
+            case "/set-game-data":
+                // Update player game state
+                bool success = Multiplayer.Server.TryGetLoggedInPlayerPrivateData(
+                    identifiedMessage.ID, out ServerClientGameData data);
+                if (success)
+                {
+                    data.Data.Json = cmd.Arguments[1];
+                }
+                break;
+                
+            case "/get-server-data":
+                // Return all players' public data
+                response_terminal.Next("server-data")
+                    .Arg($"{JsonUtility.ToJson(Multiplayer.Server.PublicServerData)}");
+                break;
+                
+            default:
+                // Unknown command
+                response_terminal.Next("error").Arg("Unknown command");
+                break;
+        }
+    }
+    
+    // Send response
+    Multiplayer.Server.Response(new IdentifiedMessage(
+        new Message(JsonUtility.ToJson(response_terminal)), 
+        identifiedMessage.ID
+    ));
+};</pre>
+
+                <h3>Example 5: Thread-Safe Data Access</h3>
+                <p>This example shows how to safely access data in a multi-threaded environment:</p>
+                <pre class="code-block">// All data structures use locks for thread safety
+// Example from ServerGameData
+private readonly object _clients_lock;
+private ServerClientGameData[] _clients;
+
+public ServerClientGameData[] Clients
+{
+    get
+    {
+        lock (_clients_lock)
+        {
+            return _clients;
+        }
+    }
+    set
+    {
+        lock (_clients_lock)
+        {
+            _clients = value;
+        }
+    }
+}
+
+// Safe access pattern
+public void AddPlayer(ServerClientGameData player)
+{
+    lock (_clients_lock)
+    {
+        ServerClientGameData[] players = new ServerClientGameData[_clients.Length + 1];
+        
+        for (int i = 0; i < _clients.Length; i++)
+        {
+            players[i] = _clients[i];
+        }
+        
+        players[_clients.Length] = player;
+        _clients = players;
+    }
+}
+
+// Usage in game code
+lock (serverData)
+{
+    // Access data safely
+    var players = serverData.Clients;
+    foreach (var player in players)
+    {
+        // Process player data
+    }
+}</pre>
+
+                <h3>Example 6: Platform-Specific Initialization</h3>
+                <p>This example shows how to handle different platforms:</p>
+                <pre class="code-block">// Platform detection
+private EPlatform GetPlatform()
+{
+#if UNITY_STANDALONE_WIN
+    return EPlatform.Windows;
+#elif UNITY_STANDALONE_LINUX
+    return EPlatform.Linux;
+#elif UNITY_STANDALONE_OSX
+    return EPlatform.MacOS;
+#elif UNITY_ANDROID
+    return EPlatform.Android;
+#elif UNITY_IOS
+    return EPlatform.IOS;
+#else
+    return EPlatform.Standalone;
+#endif
+}
+
+// Platform-specific IP retrieval
+EPlatform platform = GetPlatform();
+IPAddress[] addresses = Lan.LocalIPv4Addresses(platform);
+
+// Platform-specific broadcast
+if ((platform & EPlatform.Mobile) != 0)
+{
+    // Use mobile broadcast implementation
+    // MobileBroadcastClient / MobileBroadcastServer
+}
+else
+{
+    // Use desktop broadcast implementation
+    // BroadcastClient / BroadcastServer
+}</pre>
+            </section>
+
+            <section class="doc-section">
                 <h2>Building</h2>
 
                 <h3>.NET Project</h3>
