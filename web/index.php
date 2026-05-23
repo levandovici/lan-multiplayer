@@ -17,6 +17,7 @@ require_once 'config.php';
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
+                    <li><a href="docs.php">Docs</a></li>
                     <li><a href="privacy.php">Privacy</a></li>
                     <li><a href="terms.php">Terms</a></li>
                 </ul>
@@ -29,7 +30,10 @@ require_once 'config.php';
             <section class="hero">
                 <h1>Lan Multiplayer</h1>
                 <p>Powerful LAN multiplayer networking solution for game developers</p>
-                <a href="download.php" class="btn btn-large">Download Now</a>
+                <div class="hero-buttons">
+                    <a href="download.php" class="btn btn-large">Download Now</a>
+                    <a href="docs.php" class="btn btn-large">View Docs</a>
+                </div>
             </section>
 
             <section class="features">
