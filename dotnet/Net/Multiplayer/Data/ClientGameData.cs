@@ -27,6 +27,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
     /// <summary>
     /// Represents client game data including server ID and credentials.
     /// </summary>
+    [Serializable]
     public sealed class ClientGameData
     {
         private string _server_id;

@@ -27,6 +27,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
     /// <summary>
     /// Represents authentication credentials with an ID and password.
     /// </summary>
+    [Serializable]
     public sealed class Credentials
     {
         /// <summary>

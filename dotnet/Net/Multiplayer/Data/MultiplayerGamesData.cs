@@ -27,6 +27,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
     /// <summary>
     /// Container for multiplayer game data including servers and clients.
     /// </summary>
+    [Serializable]
     public sealed class MultiplayerGamesData
     {
         private ServerGameData[] _servers;

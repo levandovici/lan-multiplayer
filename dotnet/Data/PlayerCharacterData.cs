@@ -27,6 +27,7 @@ namespace Michitai.Lan.Data
     /// <summary>
     /// Represents player character data with JSON serialization capabilities.
     /// </summary>
+    [Serializable]
     public sealed class PlayerCharacterData : IJsonStorage
     {
         private string _json;

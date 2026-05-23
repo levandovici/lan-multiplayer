@@ -27,6 +27,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
     /// <summary>
     /// Represents a discovered server with its information and network endpoint.
     /// </summary>
+    [Serializable]
     public class LocatedServerInfo
     {
         private ServerInfo _server_info;
