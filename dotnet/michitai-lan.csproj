@@ -7,8 +7,8 @@
     <ProjectGuid>{3FEF3D9D-E178-4DE7-B409-E88ED0E9A906}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>michitai</RootNamespace>
-    <AssemblyName>michitai</AssemblyName>
+    <RootNamespace>Michitai</RootNamespace>
+    <AssemblyName>michitai-lan</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -41,6 +41,39 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\IJsonStorage.cs" />
+    <Compile Include="Data\PlayerCharacterData.cs" />
+    <Compile Include="Data\PlayerGameData.cs" />
+    <Compile Include="Data\PlayerWorldData.cs" />
+    <Compile Include="EPlatform.cs" />
+    <Compile Include="Net\AppMessage.cs" />
+    <Compile Include="Net\IdentifiedMessage.cs" />
+    <Compile Include="Net\Lan.cs" />
+    <Compile Include="Net\LocatedMessage.cs" />
+    <Compile Include="Net\Message.cs" />
+    <Compile Include="Net\Multiplayer\BroadcastClient.cs" />
+    <Compile Include="Net\Multiplayer\BroadcastServer.cs" />
+    <Compile Include="Net\Multiplayer\Chat\Chat.cs" />
+    <Compile Include="Net\Multiplayer\Chat\Letter.cs" />
+    <Compile Include="Net\Multiplayer\Client.cs" />
+    <Compile Include="Net\Multiplayer\Commands\Command.cs" />
+    <Compile Include="Net\Multiplayer\Commands\Terminal.cs" />
+    <Compile Include="Net\Multiplayer\Data\ClientGameData.cs" />
+    <Compile Include="Net\Multiplayer\Data\Credentials.cs" />
+    <Compile Include="Net\Multiplayer\Data\LocatedServerInfo.cs" />
+    <Compile Include="Net\Multiplayer\Data\LocatedServerInfoStack.cs" />
+    <Compile Include="Net\Multiplayer\Data\MultiplayerGamesData.cs" />
+    <Compile Include="Net\Multiplayer\Data\ServerClientGameData.cs" />
+    <Compile Include="Net\Multiplayer\Data\ServerGameData.cs" />
+    <Compile Include="Net\Multiplayer\Data\ServerInfo.cs" />
+    <Compile Include="Net\Multiplayer\Data\ServerInfoStack.cs" />
+    <Compile Include="Net\Multiplayer\Multiplayer.cs" />
+    <Compile Include="Net\Multiplayer\Server.cs" />
+    <Compile Include="Net\PortRange.cs" />
+    <Compile Include="Net\TCPClient.cs" />
+    <Compile Include="Net\TCPServer.cs" />
+    <Compile Include="Net\TCPServerClient.cs" />
+    <Compile Include="Net\UDPBroadcast.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
