@@ -24,23 +24,23 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer.Chat
 {
-            public sealed class Letter
-{
-    private string _id;
-
-    private string _message;
-
-
-    private object _id_lock;
-
-    private object _message_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a single chat message with an ID and message content.
     /// </summary>
-    public string ID
+    public sealed class Letter
+    {
+        private string _id;
+
+        private string _message;
+
+        private object _id_lock;
+
+        private object _message_lock;
+
+        /// <summary>
+        /// Gets or sets the letter ID. Thread-safe.
+        /// </summary>
+        public string ID
     {
         get
         {
@@ -59,10 +59,10 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public string Message
+        /// <summary>
+        /// Gets or sets the message content. Thread-safe.
+        /// </summary>
+        public string Message
     {
         get
         {
@@ -83,12 +83,12 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    /// <param name="message"></param>
-    public Letter(string id, string message)
+        /// <summary>
+        /// Initializes a new instance of Letter with the specified ID and message.
+        /// </summary>
+        /// <param name="id">The letter ID.</param>
+        /// <param name="message">The message content.</param>
+        public Letter(string id, string message)
     {
         _id = id;
 
@@ -100,10 +100,10 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
         _message_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Letter()
+        /// <summary>
+        /// Initializes a new instance of Letter with empty values.
+        /// </summary>
+        public Letter()
     {
         _id_lock = new object();
 

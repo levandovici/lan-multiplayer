@@ -24,15 +24,19 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public sealed class MultiplayerGamesData
-{
-    private ServerGameData[] _servers;
+    /// <summary>
+    /// Container for multiplayer game data including servers and clients.
+    /// </summary>
+    public sealed class MultiplayerGamesData
+    {
+        private ServerGameData[] _servers;
 
-    private ClientGameData[] _clients;
+        private ClientGameData[] _clients;
 
-
-
-    public ServerGameData[] ServersData
+        /// <summary>
+        /// Gets or sets the array of server game data.
+        /// </summary>
+        public ServerGameData[] ServersData
     {
         get
         {
@@ -45,7 +49,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public ClientGameData[] ClientsData
+        /// <summary>
+        /// Gets or sets the array of client game data.
+        /// </summary>
+        public ClientGameData[] ClientsData
     {
         get
         {
@@ -60,7 +67,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    public MultiplayerGamesData()
+        /// <summary>
+        /// Initializes a new instance of MultiplayerGamesData with empty arrays.
+        /// </summary>
+        public MultiplayerGamesData()
     {
         _servers = new ServerGameData[0];
 

@@ -24,25 +24,24 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public sealed class BroadcastServer
-{
     /// <summary>
-    /// 
+    /// Broadcast server for responding to client discovery requests on the LAN.
     /// </summary>
-    /// <param name="incoming"></param>
-    /// <returns></returns>
-    public delegate AppMessage ProcessMessageDelegate(LocatedMessage incoming);
+    public sealed class BroadcastServer
+    {
+        /// <summary>
+        /// Delegate for processing incoming broadcast messages.
+        /// </summary>
+        /// <param name="incoming">The incoming located message.</param>
+        /// <returns>The application message response.</returns>
+        public delegate AppMessage ProcessMessageDelegate(LocatedMessage incoming);
 
+        private UDPBroadcast _socket;
 
-
-    private UDPBroadcast _socket;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public UDPBroadcast Socket
+        /// <summary>
+        /// Gets or sets the UDP broadcast socket.
+        /// </summary>
+        public UDPBroadcast Socket
     {
         get
         {
@@ -57,65 +56,65 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    public BroadcastServer(IPEndPoint point)
+        /// <summary>
+        /// Initializes a new instance of BroadcastServer with the specified IP endpoint.
+        /// </summary>
+        /// <param name="point">The IP endpoint to bind to.</param>
+        public BroadcastServer(IPEndPoint point)
     {
         _socket = new UDPBroadcast(point);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    public BroadcastServer(IPAddress ip, int port)
+        /// <summary>
+        /// Initializes a new instance of BroadcastServer with the specified IP address and port.
+        /// </summary>
+        /// <param name="ip">The IP address to bind to.</param>
+        /// <param name="port">The port to bind to.</param>
+        public BroadcastServer(IPAddress ip, int port)
     {
         _socket = new UDPBroadcast(ip, port);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="range"></param>
-    public BroadcastServer(IPAddress ip, PortRange range)
+        /// <summary>
+        /// Initializes a new instance of BroadcastServer with the specified IP and port range.
+        /// </summary>
+        /// <param name="ip">The IP address to bind to.</param>
+        /// <param name="range">The port range to select a port from.</param>
+        public BroadcastServer(IPAddress ip, PortRange range)
     {
         _socket = new UDPBroadcast(ip, range);
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the broadcast server.
+        /// </summary>
+        public void Stop()
     {
         Socket.Stop();
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="process"></param>
-    public void Broadcast(ProcessMessageDelegate process)
+        /// <summary>
+        /// Processes a single broadcast message and sends the response.
+        /// </summary>
+        /// <param name="process">The delegate to process the incoming message.</param>
+        public void Broadcast(ProcessMessageDelegate process)
     {
         LocatedMessage message = Socket.Receive();
 
         Socket.Send(message.IPEndPoint, process.Invoke(message));
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="process"></param>
-    /// <param name="timeoutMilliseconds"></param>
-    /// <returns></returns>
-    public bool Broadcast(ProcessMessageDelegate process, int timeoutMilliseconds)
+        /// <summary>
+        /// Processes a single broadcast message with a timeout.
+        /// </summary>
+        /// <param name="process">The delegate to process the incoming message.</param>
+        /// <param name="timeoutMilliseconds">The timeout in milliseconds.</param>
+        /// <returns>True if the broadcast completed within the timeout.</returns>
+        public bool Broadcast(ProcessMessageDelegate process, int timeoutMilliseconds)
     {
         Task broadcast = Task.Run(() => Broadcast(process));
 
@@ -123,12 +122,11 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="process"></param>
-    /// <returns></returns>
-    public async Task BroadcastAsync(ProcessMessageDelegate process)
+        /// <summary>
+        /// Asynchronously processes a single broadcast message and sends the response.
+        /// </summary>
+        /// <param name="process">The delegate to process the incoming message.</param>
+        public async Task BroadcastAsync(ProcessMessageDelegate process)
     {
         LocatedMessage incoming = await Socket.ReceiveAsync();
 
@@ -138,13 +136,13 @@ namespace Michitai.Lan.Net.Multiplayer
         await Socket.SendAsync(incoming.IPEndPoint, process.Invoke(incoming));
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="process"></param>
-    /// <param name="timeoutMilliseconds"></param>
-    /// <returns></returns>
-    public async Task<bool> BroadcastAsync(ProcessMessageDelegate process, int timeoutMilliseconds)
+        /// <summary>
+        /// Asynchronously processes a single broadcast message with a timeout.
+        /// </summary>
+        /// <param name="process">The delegate to process the incoming message.</param>
+        /// <param name="timeoutMilliseconds">The timeout in milliseconds.</param>
+        /// <returns>True if the broadcast completed within the timeout.</returns>
+        public async Task<bool> BroadcastAsync(ProcessMessageDelegate process, int timeoutMilliseconds)
     {
         Task timeout = Task.Run(async () => await Task.Delay(timeoutMilliseconds));
 

@@ -24,23 +24,23 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public sealed class ServerClientGameData
-{
-    private PlayerGameData _data;
-
-    private Credentials _credentials;
-
-
-    private readonly object _data_lock;
-
-    private readonly object _credentials_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Represents client game data on the server side, including player data and credentials.
     /// </summary>
-    public PlayerGameData Data
+    public sealed class ServerClientGameData
+    {
+        private PlayerGameData _data;
+
+        private Credentials _credentials;
+
+        private readonly object _data_lock;
+
+        private readonly object _credentials_lock;
+
+        /// <summary>
+        /// Gets or sets the player game data. Thread-safe.
+        /// </summary>
+        public PlayerGameData Data
     {
         get
         {
@@ -59,10 +59,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Credentials Credentials
+        /// <summary>
+        /// Gets or sets the client credentials. Thread-safe.
+        /// </summary>
+        public Credentials Credentials
     {
         get
         {
@@ -81,20 +81,20 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    [JsonIgnore]
-    public ServerClientGameData Public => new ServerClientGameData(Data, Credentials.Public);
+        /// <summary>
+        /// Gets a public view of the client data (with public credentials only).
+        /// </summary>
+        [JsonIgnore]
+        public ServerClientGameData Public => new ServerClientGameData(Data, Credentials.Public);
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="gameData"></param>
-    /// <param name="credentials"></param>
-    public ServerClientGameData(PlayerGameData gameData, Credentials credentials)
+        /// <summary>
+        /// Initializes a new instance of ServerClientGameData with the specified data and credentials.
+        /// </summary>
+        /// <param name="gameData">The player game data.</param>
+        /// <param name="credentials">The client credentials.</param>
+        public ServerClientGameData(PlayerGameData gameData, Credentials credentials)
     {
         _data = gameData;
 
@@ -106,10 +106,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         _credentials_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerClientGameData()
+        /// <summary>
+        /// Initializes a new instance of ServerClientGameData with default credentials.
+        /// </summary>
+        public ServerClientGameData()
     {
         _credentials = new Credentials("id", "password");
 
@@ -121,11 +121,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString()
+        /// <summary>
+        /// Returns a string representation of the server client game data.
+        /// </summary>
+        /// <returns>A string containing credentials and data.</returns>
+        public override string ToString()
     {
         return $"[SERVER-CLIENT-GAME-DATA]{_credentials}{_data?.ToString()}";
     }

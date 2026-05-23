@@ -24,71 +24,71 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public static class Multiplayer
-{
     /// <summary>
-    /// 
+    /// Static class providing centralized multiplayer game management and configuration.
     /// </summary>
-    public static string Name = "New Multiplayer Game";
+    public static class Multiplayer
+    {
+        /// <summary>
+        /// The name of the multiplayer game.
+        /// </summary>
+        public static string Name = "New Multiplayer Game";
 
-    /// <summary>
-    /// The IP address to which the server or/and client will connect
-    /// </summary>
-    public static IPAddress IpAddress = IPAddress.Any;
+        /// <summary>
+        /// The IP address to which the server or/and client will connect.
+        /// </summary>
+        public static IPAddress IpAddress = IPAddress.Any;
 
-    /// <summary>
-    /// The port to which the client will connect
-    /// </summary>
-    public static int Port = 50000;
+        /// <summary>
+        /// The port to which the client will connect.
+        /// </summary>
+        public static int Port = 50000;
 
+        /// <summary>
+        /// Port range. One of them will be used by the server. Default 50000-50128.
+        /// </summary>
+        public static PortRange ServerPortRange = new PortRange(50000, 50128);
 
-    /// <summary>
-    /// Port range. One of them will be used by the server. Default 50000-50128
-    /// </summary>
-    public static PortRange ServerPortRange = new PortRange(50000, 50128);
+        /// <summary>
+        /// Port range. Used by Server and Client to Response and Request UDP Messages. Default 60000-60128.
+        /// </summary>
+        public static PortRange BroadcastPortRange = new PortRange(60000, 60128);
 
-    /// <summary>
-    /// Port range. Used by Server and Client to Response and Request UDP Messages. Default 60000-60128
-    /// </summary>
-    public static PortRange BroadcastPortRange = new PortRange(60000, 60128);
+        /// <summary>
+        /// The multiplayer server instance.
+        /// </summary>
+        public static Server Server = null;
 
+        /// <summary>
+        /// The multiplayer client instance.
+        /// </summary>
+        public static Client Client = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static Server Server = null;
+        /// <summary>
+        /// The broadcast server instance.
+        /// </summary>
+        public static BroadcastServer BroadcastServer = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static Client Client = null;
+        /// <summary>
+        /// Task for running the broadcast server.
+        /// </summary>
+        private static Task _BroadcastServerTask = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public static BroadcastServer BroadcastServer = null;
+        /// <summary>
+        /// Cancellation token source for the broadcast server task.
+        /// </summary>
+        private static CancellationTokenSource _BroadcastServerTaskTokenSource = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static Task _BroadcastServerTask = null;
+        /// <summary>
+        /// The broadcast client instance.
+        /// </summary>
+        public static BroadcastClient BroadcastClient = null;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private static CancellationTokenSource _BroadcastServerTaskTokenSource = null;
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public static BroadcastClient BroadcastClient = null;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns>True if BroadcastClient locating Response from Server, otherwise False.</returns>
-    public static bool BroadcastClientLocating
+        /// <summary>
+        /// Gets whether the broadcast client is locating responses from the server.
+        /// </summary>
+        /// <returns>True if BroadcastClient locating Response from Server, otherwise False.</returns>
+        public static bool BroadcastClientLocating
     {
         get
         {

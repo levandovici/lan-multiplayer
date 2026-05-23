@@ -24,20 +24,23 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
-            public class ServerInfoStack
-{
-    private Stack<ServerInfo> _stack;
+    /// <summary>
+    /// Thread-safe stack for managing server information.
+    /// </summary>
+    public class ServerInfoStack
+    {
+        private Stack<ServerInfo> _stack;
 
-    private int _count;
+        private int _count;
 
+        private object _stack_lock;
 
-    private object _stack_lock;
+        private object _count_lock;
 
-    private object _count_lock;
-
-
-
-    public ServerInfoStack()
+        /// <summary>
+        /// Initializes a new instance of ServerInfoStack.
+        /// </summary>
+        public ServerInfoStack()
     {
         _stack = new Stack<ServerInfo>();
 
@@ -51,7 +54,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
 
 
 
-    public void Push(ServerInfo serverInfo)
+        /// <summary>
+        /// Pushes a server info onto the stack. Thread-safe.
+        /// </summary>
+        /// <param name="serverInfo">The server info to push.</param>
+        public void Push(ServerInfo serverInfo)
     {
         lock (_stack_lock)
         {
@@ -64,7 +71,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public ServerInfo Pop()
+        /// <summary>
+        /// Pops a server info from the stack. Thread-safe.
+        /// </summary>
+        /// <returns>The popped server info.</returns>
+        public ServerInfo Pop()
     {
         lock (_stack_lock)
         {
@@ -77,7 +88,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public ServerInfo Peek()
+        /// <summary>
+        /// Peeks at the top server info without removing it. Thread-safe.
+        /// </summary>
+        /// <returns>The top server info.</returns>
+        public ServerInfo Peek()
     {
         lock (_stack_lock)
         {
@@ -85,7 +100,11 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public int Count()
+        /// <summary>
+        /// Gets the number of server infos in the stack. Thread-safe.
+        /// </summary>
+        /// <returns>The count.</returns>
+        public int Count()
     {
         lock (_count_lock)
         {
@@ -93,7 +112,10 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         }
     }
 
-    public void Clear()
+        /// <summary>
+        /// Clears all server infos from the stack. Thread-safe.
+        /// </summary>
+        public void Clear()
     {
         lock (_stack_lock)
         {

@@ -24,8 +24,24 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan
 {
-        public enum EPlatform
-{
-    Windows = 1, Linux = 2, MacOS = 4, Standalone = 7, Android = 8, IOS = 16, Mobile = 24,
-}
+    /// <summary>
+    /// Enumeration representing different operating platforms.
+    /// </summary>
+    public enum EPlatform
+    {
+        /// <summary>Windows platform</summary>
+        Windows = 1,
+        /// <summary>Linux platform</summary>
+        Linux = 2,
+        /// <summary>macOS platform</summary>
+        MacOS = 4,
+        /// <summary>Standalone desktop platform (Windows + Linux + macOS)</summary>
+        Standalone = 7,
+        /// <summary>Android platform</summary>
+        Android = 8,
+        /// <summary>iOS platform</summary>
+        IOS = 16,
+        /// <summary>Mobile platforms (Android + iOS)</summary>
+        Mobile = 24
+    }
 }

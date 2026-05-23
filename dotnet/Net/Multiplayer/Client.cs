@@ -24,41 +24,40 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public sealed class Client
-{
-    private TCPClient _client;
-
-    private ClientGameData _client_data;
-
-    private PlayerGameData _game_data;
-
-    private ServerGameData _server_data;
-
-    private bool _is_responsed = true;
-
-
-
     /// <summary>
-    /// 
+    /// Multiplayer client for connecting to and communicating with a multiplayer server.
     /// </summary>
-    public event Action<Message> OnResponse;
+    public sealed class Client
+    {
+        private TCPClient _client;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action OnDisconnected;
+        private ClientGameData _client_data;
 
+        private PlayerGameData _game_data;
 
+        private ServerGameData _server_data;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsClosed => _client.IsClosed;
+        private bool _is_responsed = true;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsInitialized
+        /// <summary>
+        /// Event raised when a response message is received.
+        /// </summary>
+        public event Action<Message> OnResponse;
+
+        /// <summary>
+        /// Event raised when the client is disconnected.
+        /// </summary>
+        public event Action OnDisconnected;
+
+        /// <summary>
+        /// Gets whether the client is closed.
+        /// </summary>
+        public bool IsClosed => _client.IsClosed;
+
+        /// <summary>
+        /// Gets whether the client is initialized with all required data.
+        /// </summary>
+        public bool IsInitialized
     {
         get
         {
@@ -66,10 +65,10 @@ namespace Michitai.Lan.Net.Multiplayer
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsResponsed
+        /// <summary>
+        /// Gets or sets whether the client has received a response to the last request.
+        /// </summary>
+        public bool IsResponsed
     {
         get
         {
@@ -82,10 +81,10 @@ namespace Michitai.Lan.Net.Multiplayer
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool CanRequest
+        /// <summary>
+        /// Gets whether the client can send a request (initialized and not waiting for response).
+        /// </summary>
+        public bool CanRequest
     {
         get
         {
@@ -94,10 +93,10 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ClientGameData ClientData
+        /// <summary>
+        /// Gets or sets the client game data.
+        /// </summary>
+        public ClientGameData ClientData
     {
         get
         {
@@ -110,10 +109,10 @@ namespace Michitai.Lan.Net.Multiplayer
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public PlayerGameData GameData
+        /// <summary>
+        /// Gets or sets the player game data.
+        /// </summary>
+        public PlayerGameData GameData
     {
         get
         {
@@ -126,10 +125,10 @@ namespace Michitai.Lan.Net.Multiplayer
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerGameData ServerData
+        /// <summary>
+        /// Gets or sets the server game data.
+        /// </summary>
+        public ServerGameData ServerData
     {
         get
         {
@@ -144,13 +143,14 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="clientGameData"></param>
-    /// <param name="ipEndPoint"></param>
-    /// <param name="bufferSize"></param>
-    public Client(ClientGameData clientGameData, PlayerGameData gameData, IPEndPoint ipEndPoint, int bufferSize = 4096)
+        /// <summary>
+        /// Initializes a new instance of Client with the specified data and endpoint.
+        /// </summary>
+        /// <param name="clientGameData">The client game data.</param>
+        /// <param name="gameData">The player game data.</param>
+        /// <param name="ipEndPoint">The server IP endpoint.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Client(ClientGameData clientGameData, PlayerGameData gameData, IPEndPoint ipEndPoint, int bufferSize = 4096)
     {
         _client_data = clientGameData;
 
@@ -170,89 +170,90 @@ namespace Michitai.Lan.Net.Multiplayer
         _client.OnStop += () => OnDisconnected?.Invoke();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="clientGameData"></param>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="bufferSize"></param>
-    public Client(ClientGameData clientGameData, PlayerGameData gameData, IPAddress ip, int port, int bufferSize = 4096) :
+        /// <summary>
+        /// Initializes a new instance of Client with the specified data and IP address.
+        /// </summary>
+        /// <param name="clientGameData">The client game data.</param>
+        /// <param name="gameData">The player game data.</param>
+        /// <param name="ip">The server IP address.</param>
+        /// <param name="port">The server port.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Client(ClientGameData clientGameData, PlayerGameData gameData, IPAddress ip, int port, int bufferSize = 4096) :
         this(clientGameData, gameData, new IPEndPoint(ip, port), bufferSize)
     {
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="clientGameData"></param>
-    /// <param name="ipEndPoint"></param>
-    /// <param name="bufferSize"></param>
-    public Client(ClientGameData clientGameData, IPEndPoint ipEndPoint, int bufferSize = 4096) :
+        /// <summary>
+        /// Initializes a new instance of Client with client data only.
+        /// </summary>
+        /// <param name="clientGameData">The client game data.</param>
+        /// <param name="ipEndPoint">The server IP endpoint.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Client(ClientGameData clientGameData, IPEndPoint ipEndPoint, int bufferSize = 4096) :
         this(clientGameData, null, ipEndPoint, bufferSize)
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="clientGameData"></param>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="bufferSize"></param>
-    public Client(ClientGameData clientGameData, IPAddress ip, int port, int bufferSize = 4096) :
+        /// <summary>
+        /// Initializes a new instance of Client with client data and IP address.
+        /// </summary>
+        /// <param name="clientGameData">The client game data.</param>
+        /// <param name="ip">The server IP address.</param>
+        /// <param name="port">The server port.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Client(ClientGameData clientGameData, IPAddress ip, int port, int bufferSize = 4096) :
         this(clientGameData, null, new IPEndPoint(ip, port), bufferSize)
     {
     }
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ipEndPoint"></param>
-    /// <param name="bufferSize"></param>
-    public Client(IPEndPoint ipEndPoint, int bufferSize = 4096) :
+        /// <summary>
+        /// Initializes a new instance of Client with only the server endpoint.
+        /// </summary>
+        /// <param name="ipEndPoint">The server IP endpoint.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Client(IPEndPoint ipEndPoint, int bufferSize = 4096) :
         this(null, null, ipEndPoint, bufferSize)
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="bufferSize"></param>
-    public Client(IPAddress ip, int port, int bufferSize = 4096) :
+        /// <summary>
+        /// Initializes a new instance of Client with only the server IP address and port.
+        /// </summary>
+        /// <param name="ip">The server IP address.</param>
+        /// <param name="port">The server port.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Client(IPAddress ip, int port, int bufferSize = 4096) :
         this(null, null, new IPEndPoint(ip, port), bufferSize)
     {
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Start()
+        /// <summary>
+        /// Starts the client and connects to the server.
+        /// </summary>
+        public void Start()
     {
         _client.Start();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the client and disconnects from the server.
+        /// </summary>
+        public void Stop()
     {
         _client.Stop();
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="message"></param>
-    public void Request(Message message)
+        /// <summary>
+        /// Sends a request message to the server.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        public void Request(Message message)
     {
         if (IsResponsed)
         {

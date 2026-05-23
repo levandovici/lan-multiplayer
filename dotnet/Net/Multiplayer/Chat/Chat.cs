@@ -24,23 +24,23 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer.Chat
 {
-            public sealed class Chat
-{
-    private Letter[] _letters;
-
-    private int _max_length;
-
-
-    private object _letters_lock;
-
-    private object _max_length_lock;
-
-
-
     /// <summary>
-    /// 
+    /// Thread-safe chat container for managing chat messages with a maximum length limit.
     /// </summary>
-    public Letter[] Letters
+    public sealed class Chat
+    {
+        private Letter[] _letters;
+
+        private int _max_length;
+
+        private object _letters_lock;
+
+        private object _max_length_lock;
+
+        /// <summary>
+        /// Gets or sets the array of chat letters. Thread-safe.
+        /// </summary>
+        public Letter[] Letters
     {
         get
         {
@@ -59,10 +59,11 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public int MaxLength
+        /// <summary>
+        /// Gets or sets the maximum number of letters the chat can hold. Thread-safe.
+        /// When set, removes oldest letters if exceeding the limit.
+        /// </summary>
+        public int MaxLength
     {
         get
         {
@@ -88,11 +89,11 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="maxLength"></param>
-    public Chat(int maxLength)
+        /// <summary>
+        /// Initializes a new instance of Chat with the specified maximum length.
+        /// </summary>
+        /// <param name="maxLength">The maximum number of letters the chat can hold.</param>
+        public Chat(int maxLength)
     {
         _letters = new Letter[0];
 
@@ -104,10 +105,10 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
         _max_length_lock = new object();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public Chat()
+        /// <summary>
+        /// Initializes a new instance of Chat with a default maximum length of 128.
+        /// </summary>
+        public Chat()
     {
         _letters = new Letter[0];
 
@@ -121,11 +122,11 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="letter"></param>
-    public void Add(Letter letter)
+        /// <summary>
+        /// Adds a letter to the chat. Removes the oldest letter if at maximum capacity.
+        /// </summary>
+        /// <param name="letter">The letter to add.</param>
+        public void Add(Letter letter)
     {
         if (Letters.Length >= MaxLength)
         {
@@ -144,11 +145,11 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
         _letters[letters.Length] = letter;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="index"></param>
-    public void Delete(int index)
+        /// <summary>
+        /// Deletes a letter at the specified index.
+        /// </summary>
+        /// <param name="index">The index of the letter to delete.</param>
+        public void Delete(int index)
     {
         Letter[] letters = _letters;
 
@@ -165,10 +166,10 @@ namespace Michitai.Lan.Net.Multiplayer.Chat
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Clear()
+        /// <summary>
+        /// Clears all letters from the chat.
+        /// </summary>
+        public void Clear()
     {
         _letters = new Letter[0];
     }

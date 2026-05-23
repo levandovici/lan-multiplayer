@@ -24,18 +24,19 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class LocatedMessage
-{
-    private IPEndPoint _point;
-
-    private AppMessage _message;
-
-
-
     /// <summary>
-    /// 
+    /// Represents a message with an associated network endpoint (IP and port).
     /// </summary>
-    public IPEndPoint IPEndPoint
+    public sealed class LocatedMessage
+    {
+        private IPEndPoint _point;
+
+        private AppMessage _message;
+
+        /// <summary>
+        /// Gets or sets the IP endpoint of the message source/destination.
+        /// </summary>
+        public IPEndPoint IPEndPoint
     {
         get
         {
@@ -48,10 +49,10 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public AppMessage Message
+        /// <summary>
+        /// Gets or sets the application message.
+        /// </summary>
+        public AppMessage Message
     {
         get
         {
@@ -66,12 +67,12 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    /// <param name="message"></param>
-    public LocatedMessage(IPEndPoint point, AppMessage message)
+        /// <summary>
+        /// Initializes a new instance of LocatedMessage with the specified endpoint and message.
+        /// </summary>
+        /// <param name="point">The IP endpoint.</param>
+        /// <param name="message">The application message.</param>
+        public LocatedMessage(IPEndPoint point, AppMessage message)
     {
         _point = point;
 
@@ -80,11 +81,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <returns></returns>
-    public override string ToString()
+        /// <summary>
+        /// Returns a string representation of the located message.
+        /// </summary>
+        /// <returns>A string containing the IP endpoint and message.</returns>
+        public override string ToString()
     {
         return $"IP End Point: {IPEndPoint}\t App Message: {Message}";
     }

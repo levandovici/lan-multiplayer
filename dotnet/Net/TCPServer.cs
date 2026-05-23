@@ -24,49 +24,47 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class TCPServer
-{
-    private TcpListener _listner;
-
-    private IPEndPoint _IPEndPoint;
-
-    private int _buffer_size;
-
-    private TCPServerClient[] _clients;
-
-    private bool _closed;
-
-
-    private readonly object _clients_lock;
-
-
-
     /// <summary>
-    /// 
+    /// TCP server for managing multiple client connections and message-based communication.
     /// </summary>
-    public event Action<string> OnClientConnected;
+    public sealed class TCPServer
+    {
+        private TcpListener _listner;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action<string> OnClientDisconnected;
+        private IPEndPoint _IPEndPoint;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action<IdentifiedMessage> OnRequest;
+        private int _buffer_size;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action OnStop;
+        private TCPServerClient[] _clients;
 
+        private bool _closed;
 
+        private readonly object _clients_lock;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public bool IsClosed
+        /// <summary>
+        /// Event raised when a client connects.
+        /// </summary>
+        public event Action<string> OnClientConnected;
+
+        /// <summary>
+        /// Event raised when a client disconnects.
+        /// </summary>
+        public event Action<string> OnClientDisconnected;
+
+        /// <summary>
+        /// Event raised when a request message is received from a client.
+        /// </summary>
+        public event Action<IdentifiedMessage> OnRequest;
+
+        /// <summary>
+        /// Event raised when the server stops.
+        /// </summary>
+        public event Action OnStop;
+
+        /// <summary>
+        /// Gets whether the server is closed.
+        /// </summary>
+        public bool IsClosed
     {
         get
         {
@@ -79,30 +77,28 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public IPEndPoint IpEndPoint => _IPEndPoint;
+        /// <summary>
+        /// Gets the IP endpoint of the server.
+        /// </summary>
+        public IPEndPoint IpEndPoint => _IPEndPoint;
 
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="buffer_size"></param>
-    public TCPServer(IPAddress ip, int port, int buffer_size = 4096) :
+        /// <summary>
+        /// Initializes a new instance of TCPServer with the specified IP address and port.
+        /// </summary>
+        /// <param name="ip">The IP address to bind to.</param>
+        /// <param name="port">The port to listen on.</param>
+        /// <param name="buffer_size">The buffer size for network operations.</param>
+        public TCPServer(IPAddress ip, int port, int buffer_size = 4096) :
         this(new IPEndPoint(ip, port), buffer_size)
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip_end_point"></param>
-    /// <param name="buffer_size"></param>
-    public TCPServer(IPEndPoint ip_end_point, int buffer_size = 4096)
+        /// <summary>
+        /// Initializes a new instance of TCPServer with the specified IP endpoint.
+        /// </summary>
+        /// <param name="ip_end_point">The IP endpoint to bind to.</param>
+        /// <param name="buffer_size">The buffer size for network operations.</param>
+        public TCPServer(IPEndPoint ip_end_point, int buffer_size = 4096)
     {
         _IPEndPoint = ip_end_point;
 
@@ -120,20 +116,20 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Start()
+        /// <summary>
+        /// Starts the TCP server and begins accepting client connections.
+        /// </summary>
+        public void Start()
     {
         _listner.Start();
 
         BeginAccept();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the TCP server and disconnects all clients.
+        /// </summary>
+        public void Stop()
     {
         if (IsClosed)
             return;
@@ -161,11 +157,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="identifiedMessage"></param>
-    public void Response(IdentifiedMessage identifiedMessage)
+        /// <summary>
+        /// Sends a response message to a specific client.
+        /// </summary>
+        /// <param name="identifiedMessage">The identified message to send.</param>
+        public void Response(IdentifiedMessage identifiedMessage)
     {
         lock (_clients_lock)
         {
@@ -183,11 +179,11 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    public void Disconnect(string id)
+        /// <summary>
+        /// Disconnects a client by its ID.
+        /// </summary>
+        /// <param name="id">The client ID to disconnect.</param>
+        public void Disconnect(string id)
     {
         lock (_clients_lock)
         {
@@ -206,10 +202,10 @@ namespace Michitai.Lan.Net
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    private void BeginAccept()
+        /// <summary>
+        /// Begins asynchronous acceptance of client connections.
+        /// </summary>
+        private void BeginAccept()
     {
         try
         {
@@ -221,11 +217,11 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="result"></param>
-    private void BeginAcceptTcpClientCallback(IAsyncResult result)
+        /// <summary>
+        /// Callback for asynchronous TCP client acceptance.
+        /// </summary>
+        /// <param name="result">The asynchronous result.</param>
+        private void BeginAcceptTcpClientCallback(IAsyncResult result)
     {
         TcpClient client = null;
 
@@ -243,11 +239,11 @@ namespace Michitai.Lan.Net
         BeginAccept();
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="server_client"></param>
-    private void AddClient(TCPServerClient server_client)
+        /// <summary>
+        /// Adds a client to the server's client list.
+        /// </summary>
+        /// <param name="server_client">The server client to add.</param>
+        private void AddClient(TCPServerClient server_client)
     {
         lock (_clients_lock)
         {
@@ -268,11 +264,11 @@ namespace Michitai.Lan.Net
         }
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="id"></param>
-    private void DeleteClient(string id)
+        /// <summary>
+        /// Removes a client from the server's client list.
+        /// </summary>
+        /// <param name="id">The client ID to remove.</param>
+        private void DeleteClient(string id)
     {
         lock (_clients_lock)
         {

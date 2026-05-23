@@ -24,15 +24,19 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Data
 {
-            public sealed class PlayerWorldData : IJsonStorage
-{
-    private string _json;
+    /// <summary>
+    /// Represents player world data with JSON serialization capabilities.
+    /// </summary>
+    public sealed class PlayerWorldData : IJsonStorage
+    {
+        private string _json;
 
-    private object _json_lock;
+        private object _json_lock;
 
-
-
-    public string Json
+        /// <summary>
+        /// Gets or sets the JSON string representation of the player world data.
+        /// </summary>
+        public string Json
     {
         get
         {
@@ -53,14 +57,21 @@ namespace Michitai.Lan.Data
 
 
 
-    public PlayerWorldData()
+        /// <summary>
+        /// Initializes a new instance of PlayerWorldData with an empty JSON string.
+        /// </summary>
+        public PlayerWorldData()
     {
         _json = "";
 
         _json_lock = new object();
     }
 
-    public PlayerWorldData(string json)
+        /// <summary>
+        /// Initializes a new instance of PlayerWorldData with the specified JSON string.
+        /// </summary>
+        /// <param name="json">The JSON string to initialize with.</param>
+        public PlayerWorldData(string json)
     {
         _json = json;
 
@@ -69,12 +80,22 @@ namespace Michitai.Lan.Data
 
 
 
-    public T Get<T>()
+        /// <summary>
+        /// Deserializes the JSON data to the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize to.</typeparam>
+        /// <returns>The deserialized object.</returns>
+        public T Get<T>()
     {
         return JsonSerializer.Deserialize<T>(Json);
     }
 
-    public void Set<T>(T @object)
+        /// <summary>
+        /// Serializes the specified object to JSON.
+        /// </summary>
+        /// <typeparam name="T">The type of the object to serialize.</typeparam>
+        /// <param name="@object">The object to serialize.</param>
+        public void Set<T>(T @object)
     {
         Json = JsonSerializer.Serialize(@object);
     }

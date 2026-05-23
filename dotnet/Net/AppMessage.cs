@@ -24,17 +24,21 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net
 {
-            public sealed class AppMessage
-{
-    private int _version;
+    /// <summary>
+    /// Represents an application message with version, name, and content.
+    /// </summary>
+    public sealed class AppMessage
+    {
+        private int _version;
 
-    private string _name;
+        private string _name;
 
-    private string _message;
+        private string _message;
 
-
-
-    public int Version
+        /// <summary>
+        /// Gets or sets the message version.
+        /// </summary>
+        public int Version
     {
         get
         {
@@ -47,7 +51,10 @@ namespace Michitai.Lan.Net
         }
     }
 
-    public string Name
+        /// <summary>
+        /// Gets or sets the application name.
+        /// </summary>
+        public string Name
     {
         get
         {
@@ -60,7 +67,10 @@ namespace Michitai.Lan.Net
         }
     }
 
-    public string Message
+        /// <summary>
+        /// Gets or sets the message content.
+        /// </summary>
+        public string Message
     {
         get
         {
@@ -75,12 +85,21 @@ namespace Michitai.Lan.Net
 
 
 
-    public AppMessage()
+        /// <summary>
+        /// Initializes a new instance of AppMessage with default values.
+        /// </summary>
+        public AppMessage()
     {
 
     }
 
-    public AppMessage(int version, string name, string message)
+        /// <summary>
+        /// Initializes a new instance of AppMessage with the specified version, name, and message.
+        /// </summary>
+        /// <param name="version">The message version.</param>
+        /// <param name="name">The application name.</param>
+        /// <param name="message">The message content.</param>
+        public AppMessage(int version, string name, string message)
     {
         Version = version;
 

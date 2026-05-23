@@ -24,20 +24,23 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public sealed class BroadcastClient
-{
-    public delegate void OnReceiveResponseDelegate(LocatedMessage response);
-
-
-
-    private UDPBroadcast _socket;
-
-
-
     /// <summary>
-    /// 
+    /// Broadcast client for discovering and communicating with servers on the LAN.
     /// </summary>
-    public UDPBroadcast Socket
+    public sealed class BroadcastClient
+    {
+        /// <summary>
+        /// Delegate for handling received broadcast responses.
+        /// </summary>
+        /// <param name="response">The located message containing the response.</param>
+        public delegate void OnReceiveResponseDelegate(LocatedMessage response);
+
+        private UDPBroadcast _socket;
+
+        /// <summary>
+        /// Gets or sets the UDP broadcast socket.
+        /// </summary>
+        public UDPBroadcast Socket
     {
         get
         {
@@ -52,51 +55,56 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="point"></param>
-    public BroadcastClient(IPEndPoint point)
+        /// <summary>
+        /// Initializes a new instance of BroadcastClient with the specified IP endpoint.
+        /// </summary>
+        /// <param name="point">The IP endpoint to bind to.</param>
+        public BroadcastClient(IPEndPoint point)
     {
         _socket = new UDPBroadcast(point);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    public BroadcastClient(IPAddress ip, int port)
+        /// <summary>
+        /// Initializes a new instance of BroadcastClient with the specified IP address and port.
+        /// </summary>
+        /// <param name="ip">The IP address to bind to.</param>
+        /// <param name="port">The port to bind to.</param>
+        public BroadcastClient(IPAddress ip, int port)
     {
         _socket = new UDPBroadcast(ip, port);
     }
 
-    public BroadcastClient(IPAddress ip, PortRange range)
+        /// <summary>
+        /// Initializes a new instance of BroadcastClient with the specified IP and port range.
+        /// </summary>
+        /// <param name="ip">The IP address to bind to.</param>
+        /// <param name="range">The port range to select a port from.</param>
+        public BroadcastClient(IPAddress ip, PortRange range)
     {
         _socket = new UDPBroadcast(ip, range);
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public void Stop()
+        /// <summary>
+        /// Stops the broadcast client.
+        /// </summary>
+        public void Stop()
     {
         Socket.Stop();
     }
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="message"></param>
-    /// <param name="receiveTimeoutMilliseconds"></param>
-    /// <returns></returns>
-    public LocatedMessage BroadcastRequest(IPAddress ip, int port, AppMessage message, int receiveTimeoutMilliseconds)
+        /// <summary>
+        /// Sends a broadcast request and waits for a response.
+        /// </summary>
+        /// <param name="ip">The target IP address.</param>
+        /// <param name="port">The target port.</param>
+        /// <param name="message">The message to broadcast.</param>
+        /// <param name="receiveTimeoutMilliseconds">The receive timeout in milliseconds.</param>
+        /// <returns>The located message response.</returns>
+        public LocatedMessage BroadcastRequest(IPAddress ip, int port, AppMessage message, int receiveTimeoutMilliseconds)
     {
         Socket.Send(ip, port, message);
 

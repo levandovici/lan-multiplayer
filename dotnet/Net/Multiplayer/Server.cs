@@ -24,82 +24,81 @@ using System.Runtime.Serialization;
 
 namespace Michitai.Lan.Net.Multiplayer
 {
-            public sealed class Server
-{
-    private string _name;
-
-    private TCPServer _server;
-
-    private ServerClients _clients;
-
-    private ServerGameData _server_data;
-
-
-
     /// <summary>
-    /// 
+    /// Multiplayer server for managing client connections and game state synchronization.
     /// </summary>
-    public event Action<string> OnClientConnected;
+    public sealed class Server
+    {
+        private string _name;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action<string> OnClientDisconnected;
+        private TCPServer _server;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action<IdentifiedMessage> OnRequest;
+        private ServerClients _clients;
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public event Action OnDisconnected;
+        private ServerGameData _server_data;
+
+        /// <summary>
+        /// Event raised when a client connects.
+        /// </summary>
+        public event Action<string> OnClientConnected;
+
+        /// <summary>
+        /// Event raised when a client disconnects.
+        /// </summary>
+        public event Action<string> OnClientDisconnected;
+
+        /// <summary>
+        /// Event raised when a request message is received from a client.
+        /// </summary>
+        public event Action<IdentifiedMessage> OnRequest;
+
+        /// <summary>
+        /// Event raised when the server disconnects.
+        /// </summary>
+        public event Action OnDisconnected;
+
+        /// <summary>
+        /// Gets the server name.
+        /// </summary>
+        public string Name => _name;
+
+        /// <summary>
+        /// Gets the public server data.
+        /// </summary>
+        public ServerGameData PublicServerData => _server_data.Public;
+
+        /// <summary>
+        /// Gets the private server data.
+        /// </summary>
+        public ServerGameData PrivateServerData => _server_data;
+
+        /// <summary>
+        /// Gets the IP endpoint of the server.
+        /// </summary>
+        public IPEndPoint IPEndPoint => _server.IpEndPoint;
 
 
 
-    /// <summary>
-    /// 
-    /// </summary>
-    public string Name => _name;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerGameData PublicServerData => _server_data.Public;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public ServerGameData PrivateServerData => _server_data;
-
-    /// <summary>
-    /// 
-    /// </summary>
-    public IPEndPoint IPEndPoint => _server.IpEndPoint;
-
-
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="serverGameData"></param>
-    /// <param name="ip"></param>
-    /// <param name="port"></param>
-    /// <param name="bufferSize"></param>
-    public Server(string name, ServerGameData serverGameData, IPAddress ip, int port, int bufferSize = 4096) : this(name, serverGameData, new IPEndPoint(ip, port), bufferSize)
+        /// <summary>
+        /// Initializes a new instance of Server with the specified parameters.
+        /// </summary>
+        /// <param name="name">The server name.</param>
+        /// <param name="serverGameData">The server game data.</param>
+        /// <param name="ip">The IP address to bind to.</param>
+        /// <param name="port">The port to listen on.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Server(string name, ServerGameData serverGameData, IPAddress ip, int port, int bufferSize = 4096) : this(name, serverGameData, new IPEndPoint(ip, port), bufferSize)
     {
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="serverGameData"></param>
-    /// <param name="ipEndPoint"></param>
-    /// <param name="bufferSize"></param>
-    public Server(string name, ServerGameData serverGameData, IPEndPoint ipEndPoint, int bufferSize = 4096)
+        /// <summary>
+        /// Initializes a new instance of Server with the specified IP endpoint.
+        /// </summary>
+        /// <param name="name">The server name.</param>
+        /// <param name="serverGameData">The server game data.</param>
+        /// <param name="ipEndPoint">The IP endpoint to bind to.</param>
+        /// <param name="bufferSize">The buffer size for network operations.</param>
+        public Server(string name, ServerGameData serverGameData, IPEndPoint ipEndPoint, int bufferSize = 4096)
     {
         _name = name;
 
