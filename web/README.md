@@ -54,7 +54,7 @@ define('├── abou', '.php              # /w  ');t tgnore ru es
 ## License Information Displayed on Website
 
 - **5ree License**: Commercial use with attribution to lan.michitai.com
-- **Paid License**: €20/month for no attribution requirement
+- **Paid License**: €20 one-time payment per project for no attribution requirement
 
 ## Contact
 

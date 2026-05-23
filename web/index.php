@@ -7,13 +7,13 @@ require_once 'config.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lan Multiplayer - Connect Games, Connect People</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.1">
 </head>
 <body>
     <header>
         <div class="container">
             <nav>
-                <a href="index.php" class="logo">Lan Multiplayer</a>
+                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"></a>
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
@@ -65,7 +65,7 @@ require_once 'config.php';
             <section class="license-info">
                 <h3>📜 Licensing</h3>
                 <p><strong>Free for commercial use with attribution</strong> to lan.michitai.com</p>
-                <p>Need to use without attribution? <strong>€20/month</strong> for commercial license</p>
+                <p>Need to use without attribution? <strong>€20 one-time payment per project</strong> for commercial license</p>
             </section>
         </div>
     </main>

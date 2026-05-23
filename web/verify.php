@@ -94,13 +94,13 @@ function logFailedAttempt($db, $email, $ip) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Email - Lan Multiplayer</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1.1">
 </head>
 <body>
     <header>
         <div class="container">
             <nav>
-                <a href="index.php" class="logo">Lan Multiplayer</a>
+                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"></a>
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
