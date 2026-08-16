@@ -1,36 +1,18 @@
-Lan Multiplayer License
+MIT No Attribution
 
-Copyright (c) 2026, Lan Multiplayer (lan.michitai.com)
-All rights reserved.
+Copyright 2026 Nichita Levandovici
 
-LICENSE OPTIONS
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so.
 
-1. FREE LICENSE (WITH ATTRIBUTION)
-   You may use Lan Multiplayer for commercial purposes free of charge, provided that you:
-   - Include attribution to "lan.michitai.com" in your game's credits, about screen, or documentation
-   - Do not remove or obscure any copyright notices from the software
-   - Comply with all other terms in this license
-
-2. PAID LICENSE (NO ATTRIBUTION REQUIRED)
-   For a one-time payment of €20 per project, you may use Lan Multiplayer without the attribution requirement.
-   Contact support@michitai.com to obtain a paid license.
-
-PERMITTED USES
-- Use in personal and commercial projects
-- Modify the source code for your own use
-- Distribute as part of your compiled game/application
-
-PROHIBITED USES
-- Redistribute or sell Lan Multiplayer as a standalone product
-- Remove or alter copyright notices and attribution requirements
-- Use for illegal purposes
-- Reverse engineer for creating a competing product
-- Claim ownership of the Lan Multiplayer software
-
-DISCLAIMER OF WARRANTY
-Lan Multiplayer is provided "as is" without warranty of any kind, express or implied.
-
-LIMITATION OF LIABILITY
-In no event shall Lan Multiplayer or its developers be liable for any damages arising from use of this software.
-
-For questions about licensing, contact: support@michitai.com
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
