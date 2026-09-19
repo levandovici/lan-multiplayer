@@ -132,3 +132,6 @@ $RECYCLE.BIN/
 *.backup
 *.tmp
 *.temp
+
+# Transport verification harnesses (dotnet/.verify, unity/.verify)
+.verify/

@@ -22,6 +22,15 @@ using System.Runtime;
 using System.Runtime.Serialization;
 
 
+using Michitai.Lan;
+using Michitai.Lan.Data;
+using Michitai.Lan.Net;
+using Michitai.Lan.Net.Multiplayer;
+using Michitai.Lan.Net.Multiplayer.Chat;
+using Michitai.Lan.Net.Multiplayer.Commands;
+using Michitai.Lan.Net.Multiplayer.Data;
+using Michitai.Lan.Debug;
+
 namespace Michitai.Lan.Net.Multiplayer.Data
 {
     /// <summary>
@@ -85,7 +94,7 @@ namespace Michitai.Lan.Net.Multiplayer.Data
         /// <summary>
         /// Gets a public view of the client data (with public credentials only).
         /// </summary>
-        [JsonIgnore]
+        [IgnoreDataMember]
         public ServerClientGameData Public => new ServerClientGameData(Data, Credentials.Public);
 
 

@@ -24,6 +24,15 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Runtime;
 using System.Runtime.Serialization;
+
+using Michitai.Lan;
+using Michitai.Lan.Data;
+using Michitai.Lan.Net;
+using Michitai.Lan.Net.Multiplayer;
+using Michitai.Lan.Net.Multiplayer.Chat;
+using Michitai.Lan.Net.Multiplayer.Commands;
+using Michitai.Lan.Net.Multiplayer.Data;
+using Michitai.Lan.Debug;
 """
 
 # Project header to add at the top of each file

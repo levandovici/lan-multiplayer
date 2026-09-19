@@ -22,16 +22,28 @@ using System.Runtime;
 using System.Runtime.Serialization;
 
 
+using Michitai.Lan;
+using Michitai.Lan.Data;
+using Michitai.Lan.Net;
+using Michitai.Lan.Net.Multiplayer;
+using Michitai.Lan.Net.Multiplayer.Chat;
+using Michitai.Lan.Net.Multiplayer.Commands;
+using Michitai.Lan.Net.Multiplayer.Data;
+using Michitai.Lan.Debug;
+
 namespace Michitai.Lan.Net.Multiplayer
 {
     /// <summary>
     /// Multiplayer server for managing client connections and game state synchronization.
+    /// Includes an unreliable UDP data channel for high-frequency state sync.
     /// </summary>
     public sealed class Server
     {
         private string _name;
 
         private TCPServer _server;
+
+        private UDPChannel _data_channel;
 
         private ServerClients _clients;
 
@@ -51,6 +63,11 @@ namespace Michitai.Lan.Net.Multiplayer
         /// Event raised when a request message is received from a client.
         /// </summary>
         public event Action<IdentifiedMessage> OnRequest;
+
+        /// <summary>
+        /// Event raised when a state datagram is received over the UDP data channel.
+        /// </summary>
+        public event Action<IPEndPoint, Message> OnState;
 
         /// <summary>
         /// Event raised when the server disconnects.
@@ -76,6 +93,13 @@ namespace Michitai.Lan.Net.Multiplayer
         /// Gets the IP endpoint of the server.
         /// </summary>
         public IPEndPoint IPEndPoint => _server.IpEndPoint;
+
+        /// <summary>
+        /// Gets the UDP data channel. Bound to the same port as the TCP server
+        /// (UDP and TCP port spaces are independent), so discovered ServerInfo
+        /// already tells clients where to send state.
+        /// </summary>
+        public UDPChannel DataChannel => _data_channel;
 
 
 
@@ -170,6 +194,31 @@ namespace Michitai.Lan.Net.Multiplayer
     public void Start()
     {
         _server.Start();
+
+        try
+        {
+            _data_channel = new UDPChannel(_server.IpEndPoint);
+
+            _data_channel.OnReceive += (point, message) =>
+            {
+                try
+                {
+                    OnState?.Invoke(point, message);
+                }
+                catch (Exception e)
+                {
+                    DebugConsole.LogError($"[Michitai.Lan][STATE-HANDLER-ERROR][{e.Message}]");
+                }
+            };
+
+            _data_channel.Start();
+        }
+        catch (Exception e)
+        {
+            DebugConsole.LogError($"[Michitai.Lan][DATA-CHANNEL-START-ERROR][{e.Message}]");
+
+            _data_channel = null;
+        }
     }
 
     /// <summary>
@@ -177,7 +226,32 @@ namespace Michitai.Lan.Net.Multiplayer
     /// </summary>
     public void Stop()
     {
+        _data_channel?.Stop();
+
+        _data_channel = null;
+
         _server.Stop();
+    }
+
+
+
+    /// <summary>
+    /// Sends a state datagram to a specific client endpoint over the UDP data channel.
+    /// </summary>
+    /// <param name="target">The client UDP endpoint (learned from incoming datagrams).</param>
+    /// <param name="message">The state message to send.</param>
+    public void SendState(IPEndPoint target, Message message)
+    {
+        _data_channel?.Send(target, message);
+    }
+
+    /// <summary>
+    /// Broadcasts a state datagram to all clients that have sent state to this server.
+    /// </summary>
+    /// <param name="message">The state message to broadcast.</param>
+    public void BroadcastState(Message message)
+    {
+        _data_channel?.Broadcast(message);
     }
 
 

@@ -15,20 +15,24 @@ lan-multiplayer/
 
 ## The Library
 
-`Michitai.Lan` provides everything needed to host, discover, and join multiplayer sessions on a local network:
+`Michitai.Lan` provides everything needed to host, discover, and join multiplayer sessions on a local network — optimized for 30–60 FPS state synchronization over Wi-Fi/LAN:
 
 - **Automatic server discovery** — servers answer UDP broadcast probes (default ports `60000–60128`); clients scan the LAN to find running sessions.
-- **TCP client/server channel** — reliable request/response messaging once connected (default ports `50000–50128`, picked from a configurable `PortRange`).
+- **Reliable TCP channel** — length-prefixed binary framing, `NoDelay`, `SocketAsyncEventArgs` I/O, and queued writes for commands, login, and request/response traffic (default ports `50000–50128`).
+- **Unreliable UDP state channel** — `UDPChannel` carries per-frame state (positions, transforms, inputs) with no head-of-line blocking; bound to the same port as the TCP server so discovered endpoints just work.
+- **GZip compression** — payloads ≥ 256 bytes are compressed transparently when it shrinks them (`Compressor.Enabled` / `Compressor.Threshold` to tune).
 - **Command pattern** — fluent `Terminal`/`Command` API for batching named commands with arguments into a single request.
 - **Game data models** — `ServerGameData`, `ClientGameData`, `PlayerGameData`, `Credentials`, `ServerInfo`, etc., with public/private views and JSON storage support.
 - **Chat** — bounded, thread-safe `Chat`/`Letter` container.
 - **Cross-platform** — `EPlatform` flags (`Windows`, `Linux`, `MacOS`, `Standalone`, `Android`, `IOS`, `Mobile`) select the right network code path per platform.
 
+> **Breaking change:** the transport was rewritten from a `#end#<>#message#` string-delimiter protocol to a binary length-prefixed frame protocol. Old and new builds cannot talk to each other.
+
 ### Namespaces
 
 | Namespace | Contents |
 |---|---|
-| `Michitai.Lan.Net` | `Message`, `AppMessage`, `IdentifiedMessage`, `LocatedMessage`, `TCPClient`, `TCPServer`, `TCPServerClient`, `UDPBroadcast`, `PortRange`, `Lan` (local IP helpers) |
+| `Michitai.Lan.Net` | `Message`, `AppMessage`, `IdentifiedMessage`, `LocatedMessage`, `TCPClient`, `TCPServer`, `TCPServerClient`, `UDPBroadcast`, `UDPChannel`, `Frame`/`FrameBuffer`, `Compressor`, `PortRange`, `Lan` (local IP helpers) |
 | `Michitai.Lan.Net.Multiplayer` | `Multiplayer` (static facade), `Server`, `Client`, `BroadcastServer`, `BroadcastClient` |
 | `Michitai.Lan.Net.Multiplayer.Commands` | `Command`, `Terminal` |
 | `Michitai.Lan.Net.Multiplayer.Chat` | `Chat`, `Letter` |
@@ -44,9 +48,16 @@ Client                                  Server
   |  <-- ServerInfo (name, port) --        |
   |                                       |
   |  ------- TCP connect ----------->      |   (Server, ports 50000-50128)
-  |  ------- Terminal commands ---->       |
+  |  ------- Terminal commands ---->       |   reliable channel (frames, compressed)
   |  <------------- responses -----        |
+  |                                       |
+  |  ======= UDP state datagrams ==>       |   (UDPChannel, same port as TCP)
+  |  <====== BroadcastState =======        |   unreliable, 30-60Hz, latest-wins
 ```
+
+**Wire protocol.** Every TCP message is a frame: `[4-byte LE payload length][1-byte flags][UTF-8 payload]`. Flag `0x01` marks a GZip-compressed payload. The `FrameBuffer` decoder handles partial reads and multiple frames per read, and rejects frames announcing more than `Frame.MaxPayloadSize` (32 MB default). UDP state datagrams are `[1-byte flags][payload]`.
+
+**Which channel for what:** use `Client.Request` / `Server.Response` (TCP) for anything that must arrive — commands, login, world data. Use `Client.SendState` / `Server.BroadcastState` (UDP) for transient per-frame values where a dropped packet is immediately superseded by the next one.
 
 The static `Multiplayer` facade owns the active `Server`, `Client`, `BroadcastServer`, and `BroadcastClient` instances and exposes `StartServer`, `StartClient`, `StartBroadcastClient`, `Stop`, and lifecycle events (`OnServerStarted`, `OnClientStarted`, ...).
 
@@ -96,6 +107,28 @@ if (Multiplayer.Client.CanRequest)
             .Next("get-data")));
 }
 ```
+
+Send per-frame state over the unreliable channel (call each frame, ~30–60 Hz):
+
+```csharp
+// client -> server
+Multiplayer.SendState(new Message(JsonUtility.ToJson(myTransform)));
+
+// server -> all clients that have sent state
+Multiplayer.OnState += (IPEndPoint from, Message msg) => { /* apply state */ };
+Multiplayer.BroadcastState(new Message(worldSnapshot));
+
+// server -> one client
+Multiplayer.SendState(clientEndPoint, new Message(playerSnapshot));
+```
+
+Useful knobs and diagnostics:
+
+- `Compressor.Enabled`, `Compressor.Threshold` (default 256 bytes) — compression tuning.
+- `Frame.MaxPayloadSize` (default 32 MB) — corrupt-frame guard.
+- `UDPChannel.SafeDatagramSize` (1472) — keep state datagrams under this to avoid IP fragmentation.
+- `Client.PendingRequests`, `TCPClient.PendingWrites`, `TCPServer.PendingWrites` — backpressure indicators.
+- `Client.Send(message)` — fire-and-forget TCP send that skips the request/response queue.
 
 ### dotnet/ vs unity/
 

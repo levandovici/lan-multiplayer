@@ -38,15 +38,20 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\IJsonStorage.cs" />
+    <Compile Include="Debugging\DebugConsole.cs" />
+    <Compile Include="JsonSerializer.cs" />
     <Compile Include="Data\PlayerCharacterData.cs" />
     <Compile Include="Data\PlayerGameData.cs" />
     <Compile Include="Data\PlayerWorldData.cs" />
     <Compile Include="EPlatform.cs" />
     <Compile Include="Net\AppMessage.cs" />
+    <Compile Include="Net\Compression.cs" />
+    <Compile Include="Net\Frame.cs" />
     <Compile Include="Net\IdentifiedMessage.cs" />
     <Compile Include="Net\Lan.cs" />
     <Compile Include="Net\LocatedMessage.cs" />
@@ -74,6 +79,7 @@
     <Compile Include="Net\TCPServer.cs" />
     <Compile Include="Net\TCPServerClient.cs" />
     <Compile Include="Net\UDPBroadcast.cs" />
+    <Compile Include="Net\UDPChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

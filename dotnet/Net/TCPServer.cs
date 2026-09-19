@@ -22,6 +22,15 @@ using System.Runtime;
 using System.Runtime.Serialization;
 
 
+using Michitai.Lan;
+using Michitai.Lan.Data;
+using Michitai.Lan.Net;
+using Michitai.Lan.Net.Multiplayer;
+using Michitai.Lan.Net.Multiplayer.Chat;
+using Michitai.Lan.Net.Multiplayer.Commands;
+using Michitai.Lan.Net.Multiplayer.Data;
+using Michitai.Lan.Debug;
+
 namespace Michitai.Lan.Net
 {
     /// <summary>
@@ -83,6 +92,28 @@ namespace Michitai.Lan.Net
         public IPEndPoint IpEndPoint => _IPEndPoint;
 
         /// <summary>
+        /// Gets the total number of frames queued for writing across all clients
+        /// (backpressure indicator).
+        /// </summary>
+        public int PendingWrites
+    {
+        get
+        {
+            lock (_clients_lock)
+            {
+                int sum = 0;
+
+                for (int i = 0; i < _clients.Length; i++)
+                {
+                    sum += _clients[i].PendingWrites;
+                }
+
+                return sum;
+            }
+        }
+    }
+
+        /// <summary>
         /// Initializes a new instance of TCPServer with the specified IP address and port.
         /// </summary>
         /// <param name="ip">The IP address to bind to.</param>
@@ -122,6 +153,15 @@ namespace Michitai.Lan.Net
         public void Start()
     {
         _listner.Start();
+
+        // Reflect the actual bound endpoint (matters when port 0 was requested).
+        try
+        {
+            _IPEndPoint = _listner.LocalEndpoint as IPEndPoint ?? _IPEndPoint;
+        }
+        catch
+        {
+        }
 
         BeginAccept();
     }
@@ -175,6 +215,8 @@ namespace Michitai.Lan.Net
                 }
             }
         }
+
+        DebugConsole.LogWarning($"[TCP-Server] Response dropped: no client with ID '{identifiedMessage.ID}'.");
     }
 
 
@@ -229,7 +271,14 @@ namespace Michitai.Lan.Net
         {
             client = _listner.EndAcceptTcpClient(result);
 
-            AddClient(new TCPServerClient(client, (im) => OnRequest?.Invoke(im), (id) => Disconnect(id), _buffer_size));
+            TCPServerClient server_client = new TCPServerClient(client, (im) => OnRequest?.Invoke(im), (id) => Disconnect(id), _buffer_size);
+
+            // Register BEFORE starting reads — a read completing during
+            // construction could raise OnRequest before the client is routable,
+            // and its response would be silently dropped.
+            AddClient(server_client);
+
+            server_client.Start();
         }
         catch
         {

@@ -134,6 +134,19 @@ namespace Michitai.Lan.Net.Multiplayer
         public static int ClientOnceMaxCommands = 4;
 
         /// <summary>
+        /// Gets the active unreliable UDP data channel (server-side or client-side).
+        /// Bound to the same port as the TCP server, so discovered ServerInfo
+        /// endpoints already carry the right address for state sync.
+        /// </summary>
+        public static UDPChannel DataChannel => IsServer ? Server?.DataChannel : Client?.DataChannel;
+
+        /// <summary>
+        /// Event raised when a state datagram is received over the UDP data channel.
+        /// On the server, the endpoint identifies the sending client; on the client it is the server.
+        /// </summary>
+        public static event Action<IPEndPoint, Message> OnState;
+
+        /// <summary>
         /// Gets whether this instance is running as a server.
         /// </summary>
         public static bool IsServer => Server != null;
@@ -239,6 +252,8 @@ namespace Michitai.Lan.Net.Multiplayer
         }
 
 
+        Server.OnState += (point, message) => OnState?.Invoke(point, message);
+
         OnStartServer?.Invoke();
 
         Server.Start();
@@ -260,6 +275,8 @@ namespace Michitai.Lan.Net.Multiplayer
 
         ClientCommands = new Queue<Command>();
 
+
+        Client.OnState += (point, message) => OnState?.Invoke(point, message);
 
         OnStartClient?.Invoke();
 
@@ -329,6 +346,36 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
         /// <summary>
+        /// Sends a state datagram to the server over the unreliable UDP data channel.
+        /// Best for 30-60Hz synchronization — no head-of-line blocking, latest-wins.
+        /// </summary>
+        /// <param name="message">The state message to send.</param>
+        public static void SendState(Message message)
+    {
+        Client?.SendState(message);
+    }
+
+        /// <summary>
+        /// Broadcasts a state datagram to all clients that have sent state to this server.
+        /// </summary>
+        /// <param name="message">The state message to broadcast.</param>
+        public static void BroadcastState(Message message)
+    {
+        Server?.BroadcastState(message);
+    }
+
+        /// <summary>
+        /// Sends a state datagram to a specific client endpoint over the UDP data channel.
+        /// </summary>
+        /// <param name="target">The client UDP endpoint.</param>
+        /// <param name="message">The state message to send.</param>
+        public static void SendState(IPEndPoint target, Message message)
+    {
+        Server?.SendState(target, message);
+    }
+
+
+        /// <summary>
         /// Clears all event handlers.
         /// </summary>
         public static void ClearEvents()
@@ -340,6 +387,8 @@ namespace Michitai.Lan.Net.Multiplayer
         OnStartClient = null;
 
         OnClientStarted = null;
+
+        OnState = null;
     }
 
 

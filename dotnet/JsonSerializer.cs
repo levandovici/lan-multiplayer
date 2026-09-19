@@ -20,6 +20,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using System.Runtime;
 using System.Runtime.Serialization;
+using System.Runtime.Serialization.Json;
 
 
 using Michitai.Lan;
@@ -31,30 +32,46 @@ using Michitai.Lan.Net.Multiplayer.Commands;
 using Michitai.Lan.Net.Multiplayer.Data;
 using Michitai.Lan.Debug;
 
-namespace Michitai.Lan.Data
+namespace Michitai.Lan
 {
     /// <summary>
-    /// Interface for JSON storage with serialization and deserialization capabilities.
+    /// Minimal self-contained JSON serializer built on DataContractJsonSerializer.
+    /// Keeps the library dependency-free; serializes public fields and read/write properties.
     /// </summary>
-    public interface IJsonStorage
+    public static class JsonSerializer
     {
         /// <summary>
-        /// Gets or sets the JSON string representation of the data.
-        /// </summary>
-        string Json { get; set; }
-
-        /// <summary>
-        /// Deserializes the JSON data to the specified type.
-        /// </summary>
-        /// <typeparam name="T">The type to deserialize to.</typeparam>
-        /// <returns>The deserialized object.</returns>
-        T Get<T>();
-
-        /// <summary>
-        /// Serializes the specified object to JSON.
+        /// Serializes the specified object to a JSON string.
         /// </summary>
         /// <typeparam name="T">The type of the object to serialize.</typeparam>
-        /// <param name="@object">The object to serialize.</param>
-        void Set<T>(T @object);
+        /// <param name="value">The object to serialize.</param>
+        /// <returns>The JSON string representation.</returns>
+        public static string Serialize<T>(T value)
+    {
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
+
+        using (MemoryStream stream = new MemoryStream())
+        {
+            serializer.WriteObject(stream, value);
+
+            return Encoding.UTF8.GetString(stream.ToArray());
+        }
     }
+
+        /// <summary>
+        /// Deserializes a JSON string into an object of the specified type.
+        /// </summary>
+        /// <typeparam name="T">The type to deserialize to.</typeparam>
+        /// <param name="json">The JSON string.</param>
+        /// <returns>The deserialized object.</returns>
+        public static T Deserialize<T>(string json)
+    {
+        DataContractJsonSerializer serializer = new DataContractJsonSerializer(typeof(T));
+
+        using (MemoryStream stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+        {
+            return (T)serializer.ReadObject(stream);
+        }
+    }
+}
 }

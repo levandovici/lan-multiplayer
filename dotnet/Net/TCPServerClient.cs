@@ -21,11 +21,21 @@ using System.Text;
 using System.Runtime;
 using System.Runtime.Serialization;
 
+using Michitai.Lan;
+using Michitai.Lan.Data;
+using Michitai.Lan.Net;
+using Michitai.Lan.Net.Multiplayer;
+using Michitai.Lan.Net.Multiplayer.Chat;
+using Michitai.Lan.Net.Multiplayer.Commands;
+using Michitai.Lan.Net.Multiplayer.Data;
+using Michitai.Lan.Debug;
 
 namespace Michitai.Lan.Net
 {
     /// <summary>
-    /// Represents a connected TCP client on the server side.
+    /// Represents a connected TCP client on the server side, using the
+    /// length-prefixed frame protocol with NoDelay, SocketAsyncEventArgs I/O,
+    /// queued writes, and GZip payload compression.
     /// </summary>
     public sealed class TCPServerClient
     {
@@ -33,19 +43,27 @@ namespace Michitai.Lan.Net
 
         private TcpClient _client;
 
-        private NetworkStream _stream;
+        private Socket _socket;
+
+        private SocketAsyncEventArgs _read_args;
+
+        private SocketAsyncEventArgs _write_args;
 
         private byte[] _read_buffer;
 
-        private byte[] _write_buffer;
-
         private int _buffer_size;
 
-        private byte[] _read_message;
+        private FrameBuffer _frame_buffer;
 
-        private byte[] _write_message;
+        private readonly Queue<byte[]> _send_queue;
+
+        private readonly object _send_lock;
+
+        private bool _writing;
 
         private bool _closed;
+
+        private readonly object _state_lock;
 
         /// <summary>
         /// Event raised when a request message is received.
@@ -78,52 +96,86 @@ namespace Michitai.Lan.Net
         }
     }
 
+        /// <summary>
+        /// Gets the number of frames queued for writing (backpressure indicator).
+        /// </summary>
+        public int PendingWrites
+    {
+        get
+        {
+            lock (_send_lock)
+            {
+                return _send_queue.Count;
+            }
+        }
+    }
 
 
         /// <summary>
         /// Initializes a new instance of TCPServerClient with the specified parameters.
         /// </summary>
-        /// <param name="client">The TCP client connection.</param>
+        /// <param name="client">The accepted TCP client connection.</param>
         /// <param name="on_request">Callback for request messages.</param>
         /// <param name="on_stop">Callback for client disconnection.</param>
-        /// <param name="buffer_size">The buffer size for network operations.</param>
-        public TCPServerClient(TcpClient client, Action<IdentifiedMessage> on_request, Action<string> on_stop, int buffer_size = 4096)
+        /// <param name="buffer_size">The read buffer size in bytes.</param>
+        public TCPServerClient(TcpClient client, Action<IdentifiedMessage> on_request, Action<string> on_stop, int buffer_size = 8192)
     {
         _id = Guid.NewGuid().ToString();
 
         _client = client;
 
-        _stream = _client.GetStream();
+        _socket = client.Client;
+
+        // Disable Nagle's algorithm — required for 30-60Hz small-message latency.
+        _socket.NoDelay = true;
+
+        _socket.SendBufferSize = 65536;
+
+        _socket.ReceiveBufferSize = 65536;
 
         _buffer_size = buffer_size;
 
         _read_buffer = new byte[buffer_size];
 
-        _write_buffer = new byte[buffer_size];
+        _frame_buffer = new FrameBuffer(buffer_size * 2);
 
-        _read_message = new byte[0];
+        _send_queue = new Queue<byte[]>();
 
-        _write_message = new byte[0];
+        _send_lock = new object();
+
+        _state_lock = new object();
+
+        _writing = false;
 
         IsClosed = false;
 
         OnRequest += on_request;
 
         OnStop += on_stop;
+    }
 
 
 
-        try
-        {
-            DebugConsole.Log("[Michitai.Lan][START-READ]");
+        /// <summary>
+        /// Starts the receive loop. Must be called only after the client is
+        /// registered with the server (TCPServer.AddClient), otherwise requests
+        /// arriving during construction would have their responses dropped.
+        /// </summary>
+        public void Start()
+    {
+        _read_args = new SocketAsyncEventArgs();
 
-            _stream.BeginRead(_read_buffer, 0, _buffer_size, BeginReadCallback, null);
-        }
-        catch
-        {
-            Stop();
-            return;
-        }
+        _read_args.SetBuffer(_read_buffer, 0, _buffer_size);
+
+        _read_args.Completed += OnReadCompleted;
+
+        _write_args = new SocketAsyncEventArgs();
+
+        _write_args.Completed += OnWriteCompleted;
+
+
+
+        IssueRead();
     }
 
 
@@ -133,28 +185,53 @@ namespace Michitai.Lan.Net
         /// </summary>
         public void Stop()
     {
-        if (IsClosed)
-            return;
+        lock (_state_lock)
+        {
+            if (IsClosed)
+                return;
 
-        IsClosed = true;
+            IsClosed = true;
+        }
 
         OnRequest = null;
 
-        Socket socket = _client.Client;
+        lock (_send_lock)
+        {
+            _send_queue.Clear();
 
-        socket.Disconnect(false);
+            _writing = false;
+        }
 
-        socket.Close();
+        try
+        {
+            if (_socket.Connected)
+            {
+                _socket.Shutdown(SocketShutdown.Both);
+            }
+        }
+        catch
+        {
+        }
 
-        socket.Dispose();
+        try
+        {
+            _read_args?.Dispose();
 
-        _stream?.Close();
+            _write_args?.Dispose();
+        }
+        catch
+        {
+        }
 
-        _stream?.Dispose();
+        try
+        {
+            _client.Close();
 
-        _client.Close();
-
-        _client.Dispose();
+            _client.Dispose();
+        }
+        catch
+        {
+        }
 
 
         OnStop?.Invoke(ID);
@@ -163,72 +240,42 @@ namespace Michitai.Lan.Net
 
 
         /// <summary>
-        /// Sends a response message to the client.
+        /// Sends a response message to the client. Messages are framed, optionally
+        /// compressed, and queued so concurrent calls never interleave or get lost.
         /// </summary>
         /// <param name="message">The message to send.</param>
         public void Response(Message message)
     {
-        _write_message = Encoding.UTF8.GetBytes($"{message.GetMessage}#end#<>#message#");
-
-        int count = TransferWriteMessageBytes();
-
-        try
-        {
-            DebugConsole.Log("[Michitai.Lan][START-WRITE]");
-
-            _stream?.BeginWrite(_write_buffer, 0, count, BeginWriteCallback, null);
-        }
-        catch
-        {
-            Stop();
+        if (IsClosed)
             return;
+
+        byte[] frame = Frame.Pack(message.GetMessage);
+
+        lock (_send_lock)
+        {
+            _send_queue.Enqueue(frame);
+
+            if (_writing)
+                return;
+
+            _writing = true;
         }
+
+        PumpWrite();
     }
 
 
 
         /// <summary>
-        /// Transfers bytes from the write message to the write buffer.
+        /// Issues the next socket read.
         /// </summary>
-        /// <returns>The number of bytes transferred.</returns>
-        private int TransferWriteMessageBytes()
+        private void IssueRead()
     {
-        int count = 0;
-
-
-        for (int i = 0; i < _buffer_size && i < _write_message.Length; i++)
-        {
-            _write_buffer[i] = _write_message[i];
-
-            count++;
-        }
-
-        byte[] write_message = _write_message;
-
-        _write_message = new byte[Math.Max(write_message.Length - _buffer_size, 0)];
-
-        for (int i = _buffer_size; i < write_message.Length; i++)
-        {
-            _write_message[i - _buffer_size] = write_message[i];
-        }
-
-
-        return count;
-    }
-
-
-
-        /// <summary>
-        /// Callback for asynchronous read operations.
-        /// </summary>
-        /// <param name="result">The asynchronous result.</param>
-        private void BeginReadCallback(IAsyncResult result)
-    {
-        int count = -1;
+        bool pending;
 
         try
         {
-            count = _stream.EndRead(result);
+            pending = _socket.ReceiveAsync(_read_args);
         }
         catch
         {
@@ -236,117 +283,165 @@ namespace Michitai.Lan.Net
             return;
         }
 
-        DebugConsole.Log($"[Michitai.Lan][READ-BYTES][{count}]");
-
-        if (count > 0)
+        if (!pending)
         {
+            ProcessRead(_read_args);
+        }
+    }
+
+        /// <summary>
+        /// Handles a completed socket read (event or synchronous completion),
+        /// drains all complete frames, and reissues the read.
+        /// </summary>
+        /// <param name="e">The completed async event args.</param>
+        private void ProcessRead(SocketAsyncEventArgs e)
+    {
+        while (true)
+        {
+            if (e.SocketError != SocketError.Success || e.BytesTransferred <= 0)
+            {
+                Stop();
+                return;
+            }
+
             try
             {
-                byte[] message = _read_message;
+                _frame_buffer.Write(e.Buffer, e.Offset, e.BytesTransferred);
 
-                _read_message = new byte[message.Length + count];
+                byte[] payload;
 
-                for (int i = 0; i < message.Length; i++)
+                byte flags;
+
+                while (_frame_buffer.TryRead(out payload, out flags))
                 {
-                    _read_message[i] = message[i];
-                }
-
-                for (int i = 0; i < count; i++)
-                {
-                    _read_message[message.Length + i] = _read_buffer[i];
-                }
-
-
-
-                string msg = Encoding.UTF8.GetString(_read_message);
-
-                if (msg.Contains("#end#<>#message#"))
-                {
-                    DebugConsole.Log("[Michitai.Lan][END-READ]");
-
-                    OnRequest?.Invoke(new IdentifiedMessage(new Message(msg.Substring(0, msg.Length - 16)), _id));
-
-                    _read_message = new byte[0];
-
-                    _read_buffer = new byte[_buffer_size];
+                    Message message = new Message(Frame.Unpack(payload, flags));
 
                     try
                     {
-                        DebugConsole.Log("[Michitai.Lan][START-READ]");
-
-                        _stream?.BeginRead(_read_buffer, 0, _buffer_size, BeginReadCallback, null);
+                        OnRequest?.Invoke(new IdentifiedMessage(message, _id));
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        Stop();
-                        return;
+                        DebugConsole.LogError($"[Michitai.Lan][S-REQUEST-HANDLER-ERROR][{ex.Message}]");
                     }
-
-                    return;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                DebugConsole.LogError("[TCP-Server-Client][Error]");
+                DebugConsole.LogError($"[Michitai.Lan][S-FRAME-ERROR][{ex.GetType().Name}:{ex.Message}]");
+
+                Stop();
+                return;
             }
 
-
+            // Reissue the read; loop when the socket completes synchronously.
+            bool pending;
 
             try
             {
-                DebugConsole.Log("[Michitai.Lan][CONTINUE-READ]");
-
-                _stream.BeginRead(_read_buffer, 0, _buffer_size, BeginReadCallback, null);
+                pending = _socket.ReceiveAsync(_read_args);
             }
             catch
             {
                 Stop();
                 return;
             }
-        }
-        else
-        {
-            Stop();
+
+            if (pending)
+                return;
         }
     }
 
         /// <summary>
-        /// Callback for asynchronous write operations.
+        /// SocketAsyncEventArgs completion handler for reads.
         /// </summary>
-        /// <param name="result">The asynchronous result.</param>
-        private void BeginWriteCallback(IAsyncResult result)
+        private void OnReadCompleted(object sender, SocketAsyncEventArgs e)
     {
+        if (IsClosed)
+            return;
+
         try
         {
-            _stream.EndWrite(result);
+            ProcessRead(e);
         }
         catch
         {
-            Stop();
-            return;
+            // Args disposed or socket torn down during Stop().
         }
+    }
 
-        if (_write_message.Length > 0)
+
+
+        /// <summary>
+        /// Dequeues the next frame and writes it to the socket, looping
+        /// while sends complete synchronously.
+        /// </summary>
+        private void PumpWrite()
+    {
+        while (true)
         {
-            int count = TransferWriteMessageBytes();
+            byte[] frame;
+
+            lock (_send_lock)
+            {
+                if (_send_queue.Count == 0 || IsClosed)
+                {
+                    _writing = false;
+
+                    return;
+                }
+
+                frame = _send_queue.Dequeue();
+            }
+
+            _write_args.SetBuffer(frame, 0, frame.Length);
+
+            bool pending;
 
             try
             {
-                DebugConsole.Log("[Michitai.Lan][CONTINUE-WRITE]");
-
-                _stream.BeginWrite(_write_buffer, 0, count, BeginWriteCallback, null);
+                pending = _socket.SendAsync(_write_args);
             }
             catch
             {
                 Stop();
                 return;
             }
-        }
-        else
-        {
-            _write_buffer = new byte[_buffer_size];
 
-            DebugConsole.Log("[Michitai.Lan][END-WRITE]");
+            if (pending)
+                return;
+
+            if (_write_args.SocketError != SocketError.Success)
+            {
+                Stop();
+                return;
+            }
+
+            // Completed synchronously — loop to send the next queued frame.
+        }
+    }
+
+        /// <summary>
+        /// SocketAsyncEventArgs completion handler for writes.
+        /// </summary>
+        private void OnWriteCompleted(object sender, SocketAsyncEventArgs e)
+    {
+        if (IsClosed)
+            return;
+
+        try
+        {
+            if (e.SocketError != SocketError.Success)
+            {
+                Stop();
+                return;
+            }
+
+            PumpWrite();
+        }
+        catch
+        {
+            // Args disposed or socket torn down during Stop().
         }
     }
 }

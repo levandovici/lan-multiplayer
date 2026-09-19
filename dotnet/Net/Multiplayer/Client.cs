@@ -22,14 +22,29 @@ using System.Runtime;
 using System.Runtime.Serialization;
 
 
+using Michitai.Lan;
+using Michitai.Lan.Data;
+using Michitai.Lan.Net;
+using Michitai.Lan.Net.Multiplayer;
+using Michitai.Lan.Net.Multiplayer.Chat;
+using Michitai.Lan.Net.Multiplayer.Commands;
+using Michitai.Lan.Net.Multiplayer.Data;
+using Michitai.Lan.Debug;
+
 namespace Michitai.Lan.Net.Multiplayer
 {
     /// <summary>
     /// Multiplayer client for connecting to and communicating with a multiplayer server.
+    /// Requests that arrive while awaiting a response are queued instead of dropped.
+    /// Includes an unreliable UDP channel for high-frequency state synchronization.
     /// </summary>
     public sealed class Client
     {
         private TCPClient _client;
+
+        private UDPChannel _data_channel;
+
+        private IPEndPoint _ip_end_point;
 
         private ClientGameData _client_data;
 
@@ -38,6 +53,10 @@ namespace Michitai.Lan.Net.Multiplayer
         private ServerGameData _server_data;
 
         private bool _is_responsed = true;
+
+        private readonly Queue<Message> _pending_requests;
+
+        private readonly object _pending_lock;
 
         /// <summary>
         /// Event raised when a response message is received.
@@ -48,6 +67,11 @@ namespace Michitai.Lan.Net.Multiplayer
         /// Event raised when the client is disconnected.
         /// </summary>
         public event Action OnDisconnected;
+
+        /// <summary>
+        /// Event raised when a state datagram is received over the UDP data channel.
+        /// </summary>
+        public event Action<IPEndPoint, Message> OnState;
 
         /// <summary>
         /// Gets whether the client is closed.
@@ -66,7 +90,7 @@ namespace Michitai.Lan.Net.Multiplayer
     }
 
         /// <summary>
-        /// Gets or sets whether the client has received a response to the last request.
+        /// Gets whether the client has received a response to the last request.
         /// </summary>
         public bool IsResponsed
     {
@@ -91,6 +115,30 @@ namespace Michitai.Lan.Net.Multiplayer
             return IsInitialized && IsResponsed;
         }
     }
+
+        /// <summary>
+        /// Gets the number of queued requests waiting for responses.
+        /// </summary>
+        public int PendingRequests
+    {
+        get
+        {
+            lock (_pending_lock)
+            {
+                return _pending_requests.Count;
+            }
+        }
+    }
+
+        /// <summary>
+        /// Gets the UDP data channel used for unreliable high-frequency state sync.
+        /// </summary>
+        public UDPChannel DataChannel => _data_channel;
+
+        /// <summary>
+        /// Gets the server IP endpoint this client is connected to.
+        /// </summary>
+        public IPEndPoint ServerEndPoint => _ip_end_point;
 
 
         /// <summary>
@@ -150,11 +198,17 @@ namespace Michitai.Lan.Net.Multiplayer
         /// <param name="gameData">The player game data.</param>
         /// <param name="ipEndPoint">The server IP endpoint.</param>
         /// <param name="bufferSize">The buffer size for network operations.</param>
-        public Client(ClientGameData clientGameData, PlayerGameData gameData, IPEndPoint ipEndPoint, int bufferSize = 4096)
+        public Client(ClientGameData clientGameData, PlayerGameData gameData, IPEndPoint ipEndPoint, int bufferSize = 8192)
     {
         _client_data = clientGameData;
 
         _game_data = gameData;
+
+        _ip_end_point = ipEndPoint;
+
+        _pending_requests = new Queue<Message>();
+
+        _pending_lock = new object();
 
         _client = new TCPClient(ipEndPoint, bufferSize);
 
@@ -162,9 +216,14 @@ namespace Michitai.Lan.Net.Multiplayer
 
         _client.OnResponse += (m) =>
         {
-            IsResponsed = true;
-
-            OnResponse?.Invoke(m);
+            try
+            {
+                OnResponse?.Invoke(m);
+            }
+            finally
+            {
+                FlushPending();
+            }
         };
 
         _client.OnStop += () => OnDisconnected?.Invoke();
@@ -178,7 +237,7 @@ namespace Michitai.Lan.Net.Multiplayer
         /// <param name="ip">The server IP address.</param>
         /// <param name="port">The server port.</param>
         /// <param name="bufferSize">The buffer size for network operations.</param>
-        public Client(ClientGameData clientGameData, PlayerGameData gameData, IPAddress ip, int port, int bufferSize = 4096) :
+        public Client(ClientGameData clientGameData, PlayerGameData gameData, IPAddress ip, int port, int bufferSize = 8192) :
         this(clientGameData, gameData, new IPEndPoint(ip, port), bufferSize)
     {
     }
@@ -190,7 +249,7 @@ namespace Michitai.Lan.Net.Multiplayer
         /// <param name="clientGameData">The client game data.</param>
         /// <param name="ipEndPoint">The server IP endpoint.</param>
         /// <param name="bufferSize">The buffer size for network operations.</param>
-        public Client(ClientGameData clientGameData, IPEndPoint ipEndPoint, int bufferSize = 4096) :
+        public Client(ClientGameData clientGameData, IPEndPoint ipEndPoint, int bufferSize = 8192) :
         this(clientGameData, null, ipEndPoint, bufferSize)
     {
     }
@@ -202,7 +261,7 @@ namespace Michitai.Lan.Net.Multiplayer
         /// <param name="ip">The server IP address.</param>
         /// <param name="port">The server port.</param>
         /// <param name="bufferSize">The buffer size for network operations.</param>
-        public Client(ClientGameData clientGameData, IPAddress ip, int port, int bufferSize = 4096) :
+        public Client(ClientGameData clientGameData, IPAddress ip, int port, int bufferSize = 8192) :
         this(clientGameData, null, new IPEndPoint(ip, port), bufferSize)
     {
     }
@@ -213,7 +272,7 @@ namespace Michitai.Lan.Net.Multiplayer
         /// </summary>
         /// <param name="ipEndPoint">The server IP endpoint.</param>
         /// <param name="bufferSize">The buffer size for network operations.</param>
-        public Client(IPEndPoint ipEndPoint, int bufferSize = 4096) :
+        public Client(IPEndPoint ipEndPoint, int bufferSize = 8192) :
         this(null, null, ipEndPoint, bufferSize)
     {
     }
@@ -224,7 +283,7 @@ namespace Michitai.Lan.Net.Multiplayer
         /// <param name="ip">The server IP address.</param>
         /// <param name="port">The server port.</param>
         /// <param name="bufferSize">The buffer size for network operations.</param>
-        public Client(IPAddress ip, int port, int bufferSize = 4096) :
+        public Client(IPAddress ip, int port, int bufferSize = 8192) :
         this(null, null, new IPEndPoint(ip, port), bufferSize)
     {
     }
@@ -232,11 +291,36 @@ namespace Michitai.Lan.Net.Multiplayer
 
 
         /// <summary>
-        /// Starts the client and connects to the server.
+        /// Starts the client, connects to the server, and opens the UDP state channel.
         /// </summary>
         public void Start()
     {
         _client.Start();
+
+        try
+        {
+            _data_channel = new UDPChannel(IPAddress.Any, 0);
+
+            _data_channel.OnReceive += (point, message) =>
+            {
+                try
+                {
+                    OnState?.Invoke(point, message);
+                }
+                catch (Exception e)
+                {
+                    DebugConsole.LogError($"[Michitai.Lan][STATE-HANDLER-ERROR][{e.Message}]");
+                }
+            };
+
+            _data_channel.Start();
+        }
+        catch (Exception e)
+        {
+            DebugConsole.LogError($"[Michitai.Lan][DATA-CHANNEL-START-ERROR][{e.Message}]");
+
+            _data_channel = null;
+        }
     }
 
         /// <summary>
@@ -244,23 +328,102 @@ namespace Michitai.Lan.Net.Multiplayer
         /// </summary>
         public void Stop()
     {
+        lock (_pending_lock)
+        {
+            _pending_requests.Clear();
+        }
+
+        _data_channel?.Stop();
+
+        _data_channel = null;
+
         _client.Stop();
     }
 
 
 
         /// <summary>
-        /// Sends a request message to the server.
+        /// Sends a request message to the server. If a request is already awaiting
+        /// a response, the message is queued and sent when the response arrives.
         /// </summary>
         /// <param name="message">The message to send.</param>
         public void Request(Message message)
     {
-        if (IsResponsed)
-        {
-            IsResponsed = false;
+        bool sendNow;
 
+        lock (_pending_lock)
+        {
+            sendNow = IsResponsed;
+
+            if (sendNow)
+            {
+                IsResponsed = false;
+            }
+            else
+            {
+                _pending_requests.Enqueue(message);
+            }
+        }
+
+        if (sendNow)
+        {
             _client.Request(message);
         }
+    }
+
+        /// <summary>
+        /// Sends a message immediately without waiting for a response.
+        /// Use for fire-and-forget commands; for per-frame state prefer SendState (UDP).
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        public void Send(Message message)
+    {
+        _client.Request(message);
+    }
+
+        /// <summary>
+        /// Sends a state datagram to the server over the unreliable UDP data channel.
+        /// Best for 30-60Hz synchronization — no head-of-line blocking, latest-wins.
+        /// </summary>
+        /// <param name="message">The state message to send.</param>
+        public void SendState(Message message)
+    {
+        _data_channel?.Send(_ip_end_point, message);
+    }
+
+        /// <summary>
+        /// Sends a state datagram to the server over the unreliable UDP data channel.
+        /// </summary>
+        /// <param name="state">The state string to send.</param>
+        public void SendState(string state)
+    {
+        _data_channel?.Send(_ip_end_point, state);
+    }
+
+
+
+        /// <summary>
+        /// Sends the next queued request after a response was received.
+        /// </summary>
+        private void FlushPending()
+    {
+        Message next = null;
+
+        lock (_pending_lock)
+        {
+            if (_pending_requests.Count > 0)
+            {
+                next = _pending_requests.Dequeue();
+            }
+            else
+            {
+                IsResponsed = true;
+
+                return;
+            }
+        }
+
+        _client.Request(next);
     }
 }
 }
