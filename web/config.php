@@ -67,6 +67,14 @@ define('CODE_EXPIRY_MINUTES', envValue('CODE_EXPIRY_MINUTES', 15));
 // Environment
 define('APP_ENV', envValue('APP_ENV', 'production'));
 
+// CSS cache-busting version (auto-updates when css/style.css changes)
+$cssVersion = '2.1';
+$cssPath = __DIR__ . '/css/style.css';
+if (file_exists($cssPath)) {
+    $cssVersion = (string) filemtime($cssPath);
+}
+define('CSS_VERSION', $cssVersion);
+
 // Error Reporting
 if (APP_ENV === 'development') {
     error_reporting(E_ALL);
@@ -75,6 +83,11 @@ if (APP_ENV === 'development') {
     error_reporting(0);
     ini_set('display_errors', 0);
 }
+
+// Prevent caching of dynamic pages
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
 
 // Start Session
 if (session_status() === PHP_SESSION_NONE) {

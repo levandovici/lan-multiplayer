@@ -24,8 +24,11 @@ if (isset($_GET['version']) && in_array($_GET['version'], ['dotnet', 'unity'])) 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
     <title>Download Lan Multiplayer</title>
-    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
     <header>
@@ -46,40 +49,43 @@ if (isset($_GET['version']) && in_array($_GET['version'], ['dotnet', 'unity'])) 
     <main>
         <div class="container">
             <section class="hero">
+                <div class="badge">MIT-0 License — Free for any use</div>
                 <h1>Choose Your Version</h1>
                 <p>Select the version that matches your development environment</p>
             </section>
 
             <div class="downloads-container">
                 <h2>Download Lan Multiplayer</h2>
-                
+
+                <div class="alert alert-warning">
+                    <strong>What's new:</strong> this release ships the rewritten transport — binary length-prefixed framing, GZip compression, and an unreliable UDP channel for 30-60 FPS state sync. It is <strong>not compatible</strong> with older builds; update all clients and servers together.
+                </div>
+
                 <div class="download-buttons">
                     <div class="download-btn">
                         <a href="serve_download.php?version=dotnet" class="btn">
-                            📦 Download .NET Version
+                            Download .NET Version
                         </a>
-                        <p style="margin-top: 1rem; color: #666;">
-                            For .NET Framework 4.8+ projects
+                        <p>
+                            <code>lan-dotnet.zip</code> — full C# source for .NET Framework 4.8+ projects
                         </p>
                     </div>
-                    
+
                     <div class="download-btn">
                         <a href="serve_download.php?version=unity" class="btn">
-                            🎮 Download Unity Version
+                            Download Unity Version
                         </a>
-                        <p style="margin-top: 1rem; color: #666;">
-                            For Unity game engine projects
+                        <p>
+                            <code>lan-unity.zip</code> — drop-in C# source for Unity (Assets folder), incl. mobile broadcast helpers
                         </p>
                     </div>
                 </div>
 
                 <div class="license-info">
-                    <h3>📜 License Terms</h3>
-                    <p><strong>Free for commercial use with attribution</strong> to lan.michitai.com</p>
-                    <p>Simply include "Powered by Lan Multiplayer (lan.michitai.com)" in your game's credits or about screen.</p>
-                    <hr style="margin: 1rem 0; border: none; border-top: 1px solid #ddd;">
-                    <p><strong>No attribution required: €20 one-time payment per project</strong></p>
-                    <p>One-time payment to remove the attribution requirement. Contact us at support@michitai.com for details.</p>
+                    <h3>Open License</h3>
+                    <p><strong>Lan Multiplayer is released under the MIT No Attribution (MIT-0) license.</strong></p>
+                    <p>You may use, modify, and distribute it in personal or commercial projects without payment or attribution.</p>
+                    <p>See the <a href="terms.php">Terms and Conditions</a> and the repository <a href="https://github.com/levandovici/lan-multiplayer/blob/master/LICENSE">LICENSE</a> for the full text.</p>
                 </div>
             </div>
         </div>
@@ -87,7 +93,7 @@ if (isset($_GET['version']) && in_array($_GET['version'], ['dotnet', 'unity'])) 
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Nichita Levandovici. All rights reserved.</p>
+            <p>&copy; 2026 Nichita Levandovici. Released under MIT-0.</p>
             <p>
                 <a href="privacy.php">Privacy Policy</a> | 
                 <a href="terms.php">Terms and Conditions</a> | 

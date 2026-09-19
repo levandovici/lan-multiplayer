@@ -6,8 +6,11 @@ require_once 'config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
     <title>Terms and Conditions - Lan Multiplayer</title>
-    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
     <header>
@@ -35,16 +38,9 @@ require_once 'config.php';
                 <p>By accessing and using Lan Multiplayer software and website, you accept and agree to be bound by the terms and provisions of this agreement. If you do not agree to abide by these terms, please do not use this service.</p>
 
                 <h2>2. License Terms</h2>
-                <h3>Free License (With Attribution)</h3>
-                <p>You may use Lan Multiplayer for commercial purposes free of charge, provided that you:</p>
-                <ul>
-                    <li>Include attribution to "lan.michitai.com" in your game's credits, about screen, or documentation</li>
-                    <li>Do not remove or obscure any copyright notices from the software</li>
-                    <li>Comply with all other terms in this agreement</li>
-                </ul>
-
-                <h3>Paid License (No Attribution Required)</h3>
-                <p>For a one-time payment of €20 per project, you may use Lan Multiplayer without the attribution requirement. Contact us at support@michitai.com to obtain a paid license.</p>
+                <p>Lan Multiplayer is released under the <strong>MIT No Attribution (MIT-0) license</strong>. You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software for any purpose, commercial or non-commercial, without restriction.</p>
+                <p>No attribution is required. No payment is required.</p>
+                <p>The full license text is available at <a href="https://github.com/levandovici/lan-multiplayer/blob/master/LICENSE">https://github.com/levandovici/lan-multiplayer/blob/master/LICENSE</a> and in the <code>LICENSE</code> file included with the source.</p>
 
                 <h2>3. Permitted Uses</h2>
                 <p>You may:</p>
@@ -57,12 +53,10 @@ require_once 'config.php';
                 <h2>4. Prohibited Uses</h2>
                 <p>You may not:</p>
                 <ul>
-                    <li>Redistribute or sell Lan Multiplayer as a standalone product</li>
-                    <li>Remove or alter copyright notices and attribution requirements</li>
                     <li>Use Lan Multiplayer for illegal purposes</li>
-                    <li>Reverse engineer the software for the purpose of creating a competing product</li>
-                    <li>Claim ownership of the Lan Multiplayer software</li>
+                    <li>Claim ownership of the Lan Multiplayer software in a way that misrepresents the actual license terms</li>
                 </ul>
+                <p>Because Lan Multiplayer is released under MIT-0, you are otherwise permitted to redistribute, modify, sublicense, and even sell copies of the software in accordance with the license.</p>
 
                 <h2>5. Disclaimer of Warranty</h2>
                 <p>Lan Multiplayer is provided "as is" without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, and non-infringement.</p>
@@ -101,7 +95,7 @@ require_once 'config.php';
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Nichita Levandovici. All rights reserved.</p>
+            <p>&copy; 2026 Nichita Levandovici. Released under MIT-0.</p>
             <p>
                 <a href="privacy.php">Privacy Policy</a> | 
                 <a href="terms.php">Terms and Conditions</a> | 

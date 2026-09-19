@@ -98,8 +98,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
     <title>Download Lan Multiplayer</title>
-    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
     <header>
@@ -143,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Nichita Levandovici. All rights reserved.</p>
+            <p>&copy; 2026 Nichita Levandovici. Released under MIT-0.</p>
             <p>
                 <a href="privacy.php">Privacy Policy</a> | 
                 <a href="terms.php">Terms and Conditions</a> | 

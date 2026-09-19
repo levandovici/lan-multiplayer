@@ -111,16 +111,17 @@ LimitRequestBody 10485760
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
 </IfModule>
 
-# Cache images only
+# Disable caching for PHP, HTML, CSS, JS, and images during active development
+<FilesMatch "\.(php|html|htm|css|js|png|jpg|jpeg|gif|svg|webp|ico)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        Header set Pragma "no-cache"
+        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+    </IfModule>
+</FilesMatch>
+
 <IfModule mod_expires.c>
-    ExpiresActive On
-    ExpiresByType image/png "access plus 1 year"
-    ExpiresByType image/jpg "access plus 1 year"
-    ExpiresByType image/jpeg "access plus 1 year"
-    ExpiresByType image/gif "access plus 1 year"
-    ExpiresByType image/svg+xml "access plus 1 year"
-    ExpiresByType image/webp "access plus 1 year"
-    ExpiresByType image/ico "access plus 1 year"
+    ExpiresActive Off
 </IfModule>
 
 # Default charset

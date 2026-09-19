@@ -6,8 +6,11 @@ require_once 'config.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
     <title>Documentation - Lan Multiplayer</title>
-    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
     <header>
@@ -37,11 +40,19 @@ require_once 'config.php';
                     <li>Cross-platform LAN discovery and communication</li>
                     <li>UDP broadcast for server discovery</li>
                     <li>TCP client-server architecture for reliable data transfer</li>
+                    <li>Binary length-prefixed framing with NoDelay and SocketAsyncEventArgs I/O — built for 30-60 Hz messaging</li>
+                    <li>Unreliable UDP state channel for per-frame synchronization (positions, transforms, inputs)</li>
+                    <li>Transparent GZip payload compression</li>
+                    <li>Queued request/response with fire-and-forget sends</li>
                     <li>Thread-safe data synchronization</li>
                     <li>JSON serialization for game data</li>
                     <li>Player authentication and management</li>
                     <li>Command system for terminal-like operations</li>
                 </ul>
+
+                <div class="alert alert-info" style="background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; padding: 1rem; border-radius: 4px; margin-top: 1rem;">
+                    <strong>Breaking change:</strong> the current release uses a binary length-prefixed frame protocol. It cannot communicate with builds that used the legacy string-delimiter protocol. Make sure all clients and servers run the same version.
+                </div>
             </section>
 
             <section class="doc-section">
@@ -73,6 +84,9 @@ require_once 'config.php';
                     <ul>
                         <li><code>Lan</code> - Static class for IP address and broadcast mask operations</li>
                         <li><code>UDPBroadcast</code> - UDP broadcast functionality for network discovery</li>
+                        <li><code>UDPChannel</code> - Unreliable UDP datagram channel for high-frequency state sync</li>
+                        <li><code>Frame</code> / <code>FrameBuffer</code> - Binary wire framing and streaming decoder</li>
+                        <li><code>Compressor</code> - GZip payload compression with configurable threshold</li>
                         <li><code>TCPClient</code> - TCP client for reliable connections</li>
                         <li><code>TCPServer</code> - TCP server for accepting client connections</li>
                         <li><code>TCPServerClient</code> - Server-side representation of connected clients</li>
@@ -134,6 +148,9 @@ require_once 'config.php';
 ├── Net/
 │   ├── Lan.cs                   # LAN IP operations
 │   ├── UDPBroadcast.cs          # UDP broadcast
+│   ├── UDPChannel.cs            # Unreliable UDP state channel
+│   ├── Frame.cs                 # Binary frame codec + streaming decoder
+│   ├── Compression.cs           # GZip payload compression
 │   ├── TCPClient.cs             # TCP client
 │   ├── TCPServer.cs             # TCP server
 │   ├── TCPServerClient.cs       # Server client representation
@@ -173,6 +190,9 @@ require_once 'config.php';
 ├── Net/
 │   ├── Lan.cs                   # LAN IP operations
 │   ├── UDPBroadcast.cs          # UDP broadcast
+│   ├── UDPChannel.cs            # Unreliable UDP state channel
+│   ├── Frame.cs                 # Binary frame codec + streaming decoder
+│   ├── Compression.cs           # GZip payload compression
 │   ├── TCPClient.cs             # TCP client
 │   ├── TCPServer.cs             # TCP server
 │   ├── TCPServerClient.cs       # Server client representation
@@ -401,9 +421,42 @@ lock (playerData) {
                     <li><strong>Discovery Phase</strong>: Servers broadcast their presence via UDP</li>
                     <li><strong>Connection Phase</strong>: Clients connect via TCP to discovered servers</li>
                     <li><strong>Authentication Phase</strong>: Players authenticate with credentials</li>
-                    <li><strong>Game Phase</strong>: Request/response pattern for game data synchronization</li>
+                    <li><strong>Game Phase</strong>: Request/response over TCP for reliable data; UDP datagrams for per-frame state</li>
                     <li><strong>Disconnection Phase</strong>: Clean disconnect with resource cleanup</li>
                 </ol>
+            </section>
+
+            <section class="doc-section">
+                <h2>Transport Protocol</h2>
+                <p>The current release uses a binary wire protocol on two channels:</p>
+
+                <h3>Reliable Channel (TCP)</h3>
+                <p>Every message is sent as a frame: <code>[4-byte little-endian payload length][1-byte flags][UTF-8 payload]</code>. Flag <code>0x01</code> marks a GZip-compressed payload. The streaming decoder handles fragmented reads and multiple frames per read, and rejects frames announcing more than <code>Frame.MaxPayloadSize</code> (32 MB by default). Sockets run with <code>NoDelay</code> and <code>SocketAsyncEventArgs</code> for low-latency, low-allocation I/O, and writes are queued so concurrent sends never interleave.</p>
+                <p>Use this channel for anything that must arrive: commands, login, world data, request/response traffic.</p>
+
+                <h3>State Channel (UDP)</h3>
+                <p><code>UDPChannel</code> carries datagrams of <code>[1-byte flags][payload]</code> — unreliable, unordered, no retransmission. It binds to the <strong>same port number</strong> as the TCP server (UDP and TCP port spaces are independent), so a discovered <code>ServerInfo</code> endpoint already tells clients where to send state.</p>
+                <p>Use this channel for transient per-frame values at 30-60 Hz where a dropped packet is immediately superseded by the next one — positions, transforms, inputs. Keep datagrams under <code>UDPChannel.SafeDatagramSize</code> (1472 bytes) to avoid IP fragmentation.</p>
+                <pre class="code-block">// Client -> server, each frame
+Multiplayer.SendState(new Message(JsonUtility.ToJson(playerTransform)));
+
+// Server: receive state from clients
+Multiplayer.OnState += (IPEndPoint from, Message msg) => {
+    var transform = JsonUtility.FromJson<Transform>(msg.GetMessage);
+    ApplyState(from, transform);
+};
+
+// Server -> all clients that have sent state
+Multiplayer.BroadcastState(new Message(JsonUtility.ToJson(worldSnapshot)));
+
+// Server -> one client
+Multiplayer.SendState(clientEndPoint, new Message(JsonUtility.ToJson(playerSnapshot)));</pre>
+
+                <h3>Compression</h3>
+                <p>Payloads of 256 bytes or more are GZip-compressed automatically when compression shrinks them. Tune with <code>Compressor.Enabled</code> and <code>Compressor.Threshold</code>.</p>
+
+                <h3>Request Semantics</h3>
+                <p><code>Client.Request()</code> implements one-at-a-time request/response: calls made while awaiting a response are queued (<code>Client.PendingRequests</code>) and flushed in order. <code>Client.Send()</code> bypasses the queue for fire-and-forget TCP messages. Backpressure is observable via <code>TCPClient.PendingWrites</code> and <code>TCPServer.PendingWrites</code>.</p>
             </section>
 
             <section class="doc-section">
@@ -584,20 +637,20 @@ Multiplayer.Client.OnResponse += (message) => {
     }
 };
 
-// Game loop - send player state
+// Game loop - send player state at ~30-60 Hz over the unreliable UDP channel.
+// Requests that must arrive (login, world data) still go through Client.Request over TCP.
 private void Update()
 {
-    if (Multiplayer.IsClient && Multiplayer.Client.CanRequest)
+    if (Multiplayer.IsClient)
     {
         if (Time.time >= updateRate + lastUpdate)
         {
             lastUpdate = Time.time;
             
-            Terminal commands = Terminal.New()
-                .Next("set-game-data").Arg(JsonUtility.ToJson(new GameData(characterData)))
-                .Next("get-server-data");
-            
-            Multiplayer.Client.Request(new Message(JsonUtility.ToJson(commands)));
+            // Per-frame state: fast, no head-of-line blocking, latest-wins
+            Multiplayer.Client.SendState(new Message(
+                JsonUtility.ToJson(new GameData(characterData))
+            ));
         }
     }
 }</pre>
@@ -824,9 +877,9 @@ dotnet test</pre>
                 <h3>.NET Version</h3>
                 <ul>
                     <li>.NET Framework 4.8 or .NET 6.0+</li>
-                    <li>System.Text.Json (for .NET Framework 4.8)</li>
                     <li>System.Net.Sockets</li>
                     <li>System.Threading</li>
+                    <li>No external JSON dependency — a built-in serializer shim (DataContractJsonSerializer) is included</li>
                 </ul>
 
                 <h3>Unity Version</h3>
@@ -838,7 +891,7 @@ dotnet test</pre>
 
             <section class="doc-section">
                 <h2>License</h2>
-                <p>This project is licensed under the terms specified in the <a href="terms.php">Terms and Conditions</a>.</p>
+                <p>This project is released under the <strong>MIT No Attribution (MIT-0)</strong> license. You are free to use, modify, and distribute it for personal or commercial projects without payment or attribution. See the <a href="terms.php">Terms and Conditions</a> and the repository <a href="https://github.com/levandovici/lan-multiplayer/blob/master/LICENSE">LICENSE</a> file for the full text.</p>
             </section>
 
             <section class="doc-section">
@@ -852,7 +905,7 @@ dotnet test</pre>
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Nichita Levandovici. All rights reserved.</p>
+            <p>&copy; 2026 Nichita Levandovici. Released under MIT-0.</p>
             <p>
                 <a href="privacy.php">Privacy Policy</a> | 
                 <a href="terms.php">Terms and Conditions</a> | 

@@ -93,8 +93,11 @@ function logFailedAttempt($db, $email, $ip) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
     <title>Verify Email - Lan Multiplayer</title>
-    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
     <header>
@@ -126,7 +129,7 @@ function logFailedAttempt($db, $email, $ip) {
                 <?php endif; ?>
 
                 <?php if (APP_ENV === 'development' && isset($_SESSION['dev_code'])): ?>
-                    <div class="alert alert-info" style="background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;">
+                    <div class="alert alert-info">
                         <strong>Development Mode:</strong> Your verification code is <strong><?php echo htmlspecialchars($_SESSION['dev_code']); ?></strong>
                     </div>
                 <?php endif; ?>
@@ -134,13 +137,13 @@ function logFailedAttempt($db, $email, $ip) {
                 <form method="POST" action="">
                     <div class="form-group">
                         <label for="code">Verification Code</label>
-                        <input type="text" id="code" name="code" required placeholder="123456" maxlength="6" pattern="[0-9]{6}" style="letter-spacing: 0.5em; text-align: center; font-size: 1.5rem;">
+                        <input type="text" id="code" name="code" required placeholder="123456" maxlength="6" pattern="[0-9]{6}" class="code-input">
                     </div>
                     <button type="submit" class="btn">Verify Code</button>
                 </form>
-                
-                <p style="margin-top: 1rem; text-align: center;">
-                    <a href="download.php" style="color: #667eea;">Back to email entry</a>
+
+                <p class="text-center" style="margin-top: 1rem;">
+                    <a href="download.php">Back to email entry</a>
                 </p>
             </div>
         </div>
@@ -148,7 +151,7 @@ function logFailedAttempt($db, $email, $ip) {
 
     <footer>
         <div class="container">
-            <p>&copy; 2026 Nichita Levandovici. All rights reserved.</p>
+            <p>&copy; 2026 Nichita Levandovici. Released under MIT-0.</p>
             <p>
                 <a href="privacy.php">Privacy Policy</a> | 
                 <a href="terms.php">Terms and Conditions</a> | 

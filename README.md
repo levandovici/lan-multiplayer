@@ -166,9 +166,9 @@ python reorganize_cs.py
 
 ## License
 
-Released under **MIT No Attribution** — see [LICENSE](LICENSE).
+Released under **MIT No Attribution** — see [LICENSE](https://github.com/levandovici/lan-multiplayer/blob/master/LICENSE).
 
-Note: the distribution website (`web/`) displays its own licensing terms for downloaded packages (free with attribution to lan.michitai.com, or a paid license without attribution).
+Note: the distribution website (`web/`) reflects the same MIT-0 terms — downloaded packages are free to use without attribution or payment.
 
 ## Author
 
