@@ -135,3 +135,6 @@ $RECYCLE.BIN/
 
 # Transport verification harnesses (dotnet/.verify, unity/.verify)
 .verify/
+
+# C++ port build output
+cpp/build/

@@ -1,6 +1,6 @@
 # Lan Multiplayer (Michitai.Lan)
 
-A LAN multiplayer networking library for game developers, available as a .NET Framework class library and as a drop-in Unity source package. This repository also contains the PHP website used to distribute it.
+A LAN multiplayer networking library for game developers, available as a .NET Framework class library, as a drop-in Unity source package, and as a standalone C++20 library. This repository also contains the PHP website used to distribute it.
 
 ## Repository Layout
 
@@ -8,6 +8,7 @@ A LAN multiplayer networking library for game developers, available as a .NET Fr
 lan-multiplayer/
 ├── dotnet/            # .NET Framework 4.8 class library (michitai-lan.sln)
 ├── unity/             # Unity source variant (same API + mobile helpers)
+├── cpp/               # C++20 port — standalone CMake static lib + demo (same wire protocol)
 ├── web/               # PHP/MySQL website for distributing the library
 ├── reorganize_cs.py   # Utility that splits C# files by namespace/type
 └── LICENSE            # MIT No Attribution
@@ -140,6 +141,24 @@ The two trees share the same API and file layout. The Unity variant adds:
 
 Use the `unity/` sources directly inside a Unity project's `Assets` folder; use `dotnet/michitai-lan.sln` to build the .NET Framework 4.8 assembly.
 
+### cpp/
+
+The `cpp/` tree is a full C++20 port of the library as a standalone CMake static
+library (`Michitai::Lan`), wire-compatible with the C# builds (same frame format,
+gzip flag, port ranges). It replaces `SocketAsyncEventArgs`/`Task` with
+thread-per-connection I/O plus `std::future` async methods, and C# events with a
+multicast `Event<>` type. Only external dependency: **miniz** (gzip codec —
+reused from an existing `miniz` target if your engine provides one, otherwise
+FetchContent'd at 3.1.2).
+
+```bash
+cmake -S cpp -B cpp/build -A x64
+cmake --build cpp/build --config Debug
+./cpp/build/Debug/lan-demo        # loopback smoke test
+```
+
+See `cpp/README.md` for porting notes, C++20 feature usage, and API examples.
+
 ## The Website (`web/`)
 
 A PHP 7.4+/MySQL site that gates library downloads behind email verification:
@@ -160,7 +179,7 @@ python reorganize_cs.py
 
 ## Requirements
 
-- **Library:** .NET Framework 4.8 (dotnet) or Unity (unity)
+- **Library:** .NET Framework 4.8 (dotnet), Unity (unity), or C++20 + CMake ≥ 3.20 (cpp)
 - **Website:** PHP 7.4+, MySQL 5.7+/MariaDB 10.2+, Composer
 - **Tooling:** Python 3 for `reorganize_cs.py`
 
