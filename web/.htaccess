@@ -1,13 +1,11 @@
-# Security Headers
+# Security Headers (caching is handled per-file-type below — PHP pages set
+# their own Cache-Control in config.php)
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-XSS-Protection "1; mode=block"
     Header set Referrer-Policy "strict-origin-when-cross-origin"
     Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
-    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-    Header set Pragma "no-cache"
-    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
 </IfModule>
 
 # Disable Directory Browsing
@@ -19,7 +17,7 @@ Options -Indexes
     Deny from all
 </FilesMatch>
 
-<FilesMatch "^(composer\.json|composer\.lock|README\.md)$">
+<FilesMatch "^(composer\.json|composer\.lock|README\.md|HOSTINGER_SETUP\.md|database\.sql|setup_instructions\.txt|seo\.php)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
@@ -111,17 +109,36 @@ LimitRequestBody 10485760
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
 </IfModule>
 
-# Disable caching for PHP, HTML, CSS, JS, and images during active development
-<FilesMatch "\.(php|html|htm|css|js|png|jpg|jpeg|gif|svg|webp|ico)$">
+# Cache static assets for 7 days (PHP pages set their own Cache-Control)
+<FilesMatch "\.(html|htm|css|js|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot)$">
     <IfModule mod_headers.c>
-        Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
-        Header set Pragma "no-cache"
-        Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+        Header set Cache-Control "public, max-age=604800"
     </IfModule>
 </FilesMatch>
 
+# Cache SEO/AI-discovery text files for 1 day
+<FilesMatch "\.(txt|xml|webmanifest)$">
+    <IfModule mod_headers.c>
+        Header set Cache-Control "public, max-age=86400"
+    </IfModule>
+</FilesMatch>
+
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+
 <IfModule mod_expires.c>
-    ExpiresActive Off
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/png "access plus 7 days"
+    ExpiresByType image/jpeg "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 7 days"
+    ExpiresByType image/webp "access plus 7 days"
+    ExpiresByType font/woff2 "access plus 7 days"
+    ExpiresByType text/plain "access plus 1 day"
+    ExpiresByType text/xml "access plus 1 day"
+    ExpiresByType application/manifest+json "access plus 1 day"
 </IfModule>
 
 # Default charset

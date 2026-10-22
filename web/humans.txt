@@ -1,0 +1,14 @@
+/* TEAM */
+Author & Maintainer: Nichita Levandovici
+Site: https://lan.michitai.com
+Contact: support@michitai.com
+Location: Republic of Moldova
+
+/* SITE */
+Project: Lan Multiplayer (Michitai.Lan) — free LAN multiplayer networking library for games
+License: MIT No Attribution (MIT-0) — free for any use, no attribution required
+Copyright: 2026 Nichita Levandovici
+Last update: 2026-10-22
+Stack: PHP, MySQL (site); C#/.NET Framework 4.8, Unity, C++20/CMake (library)
+Source: https://github.com/levandovici/lan-multiplayer
+Hosting: Hostinger

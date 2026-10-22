@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'seo.php';
 
 if (!isset($_SESSION['verified']) || $_SESSION['verified'] !== true) {
     header('Location: download.php');
@@ -23,11 +24,13 @@ if (isset($_GET['version']) && in_array($_GET['version'], ['dotnet', 'unity'])) 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
-    <title>Download Lan Multiplayer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <?php seoHead([
+        'title' => 'Your Downloads - Lan Multiplayer',
+        'description' => 'Your verified Lan Multiplayer downloads: .NET Framework and Unity packages.',
+        'path' => '/downloads.php',
+        'robots' => 'noindex, nofollow',
+    ]); ?>
     <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
@@ -39,6 +42,7 @@ if (isset($_GET['version']) && in_array($_GET['version'], ['dotnet', 'unity'])) 
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
                     <li><a href="docs.php">Docs</a></li>
+                    <li><a href="faq.php">FAQ</a></li>
                     <li><a href="privacy.php">Privacy</a></li>
                     <li><a href="terms.php">Terms</a></li>
                 </ul>

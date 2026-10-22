@@ -1,0 +1,54 @@
+# robots.txt for lan.michitai.com — Lan Multiplayer (Michitai.Lan)
+# Copyright (c) 2026 Nichita Levandovici. MIT-0 — see /LICENSE or the repo LICENSE.
+# AI-friendly project summary: /llms.txt
+
+User-agent: *
+Allow: /
+Disallow: /downloads/
+Disallow: /vendor/
+Disallow: /verify.php
+Disallow: /verify_code.php
+Disallow: /send_code.php
+Disallow: /serve_download.php
+Disallow: /downloads.php
+Disallow: /setup_instructions.txt
+Disallow: /database.sql
+
+# --- AI / LLM crawlers: explicitly allowed ---
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+Sitemap: https://lan.michitai.com/sitemap.xml

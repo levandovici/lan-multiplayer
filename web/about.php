@@ -1,15 +1,24 @@
 <?php
+define('LAN_PUBLIC_PAGE', true);
 require_once 'config.php';
+require_once 'seo.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
-    <title>About Us - Lan Multiplayer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <?php seoHead([
+        'title' => 'About - Lan Multiplayer',
+        'description' => 'About Lan Multiplayer (Michitai.Lan) — a free MIT-0 LAN networking library for .NET, Unity and C++ games, built by Nichita Levandovici.',
+        'path' => '/about.php',
+        'jsonld' => [[
+            '@type' => 'AboutPage',
+            'name' => 'About Lan Multiplayer',
+            'url' => seoUrl('/about.php'),
+            'description' => 'About the Lan Multiplayer library and its author.',
+        ]],
+    ]); ?>
     <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
@@ -21,6 +30,7 @@ require_once 'config.php';
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
                     <li><a href="docs.php">Docs</a></li>
+                    <li><a href="faq.php">FAQ</a></li>
                     <li><a href="privacy.php">Privacy</a></li>
                     <li><a href="terms.php">Terms</a></li>
                 </ul>

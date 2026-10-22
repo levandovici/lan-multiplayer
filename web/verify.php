@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'seo.php';
 
 if (!isset($_SESSION['email'])) {
     header('Location: download.php');
@@ -92,11 +93,14 @@ function logFailedAttempt($db, $email, $ip) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
-    <title>Verify Email - Lan Multiplayer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <?php seoHead([
+        'title' => 'Verify Email - Lan Multiplayer',
+        'description' => 'Enter the verification code sent to your email to unlock the Lan Multiplayer downloads.',
+        'path' => '/verify.php',
+        'robots' => 'noindex, nofollow',
+        'jsonld' => [],
+    ]); ?>
     <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
@@ -107,6 +111,8 @@ function logFailedAttempt($db, $email, $ip) {
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
+                    <li><a href="docs.php">Docs</a></li>
+                    <li><a href="faq.php">FAQ</a></li>
                     <li><a href="privacy.php">Privacy</a></li>
                     <li><a href="terms.php">Terms</a></li>
                 </ul>

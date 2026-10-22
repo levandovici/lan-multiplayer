@@ -1,0 +1,17 @@
+{
+    "name": "Lan Multiplayer",
+    "short_name": "Lan Multiplayer",
+    "description": "Free MIT-0 LAN multiplayer networking library for .NET, Unity and C++ games.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#facc15",
+    "icons": [
+        {
+            "src": "/logo.png",
+            "sizes": "1254x1254",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

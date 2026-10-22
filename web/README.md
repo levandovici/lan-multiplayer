@@ -72,6 +72,26 @@ return JSON. Note: `verify_code.php` sets `is_verified` in the DB but does
 **not** create the verified session, so it cannot unlock `downloads.php` —
 the HTML flow (`download.php` → `verify.php`) is the working path.
 
+## SEO / AI-search files
+
+Static discovery files that must be uploaded to the web root:
+
+| File | Purpose |
+|---|---|
+| `robots.txt` | Allows all crawlers incl. AI bots (GPTBot, ClaudeBot, PerplexityBot, ...); disallows the verification flow and `downloads/` |
+| `sitemap.xml` | Public page index referenced from `robots.txt` |
+| `llms.txt` | Short machine-readable project summary for AI assistants |
+| `llms-full.txt` | Complete library API reference in one file (LLM context-sized) |
+| `humans.txt` | Author/site info, linked via `<link rel="author">` |
+| `site.webmanifest` | PWA manifest (name, icons, theme color) |
+| `seo.php` | Shared `<head>` renderer: meta description, robots, canonical, Open Graph, Twitter Card, JSON-LD (WebSite + SoftwareApplication + page-specific nodes). Pages pass options to `seoHead()` |
+| `faq.php` | FAQ page; its question list also generates the `FAQPage` JSON-LD |
+
+Public pages (`index`, `about`, `docs`, `faq`, `privacy`, `terms`) define
+`LAN_PUBLIC_PAGE` before loading `config.php`, which skips `session_start()`
+and sends `Cache-Control: public, max-age=300` — keeps them stateless and
+cacheable. The download flow keeps `no-store` + sessions.
+
 ## Deployment notes
 
 - `APP_ENV=development` echoes the verification code into the session /

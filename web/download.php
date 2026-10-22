@@ -1,5 +1,6 @@
 <?php
 require_once 'config.php';
+require_once 'seo.php';
 
 $message = '';
 $messageType = '';
@@ -97,11 +98,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
-    <title>Download Lan Multiplayer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <?php seoHead([
+        'title' => 'Download Lan Multiplayer - Free .NET & Unity LAN Library',
+        'description' => 'Download the free MIT-0 Lan Multiplayer library for .NET Framework 4.8 or Unity. Verify your email and get the package — free for commercial use, no attribution required.',
+        'path' => '/download.php',
+        'keywords' => 'download LAN multiplayer library, Unity LAN library download, .NET multiplayer library free, Michitai Lan download',
+    ]); ?>
     <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
@@ -112,6 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
+                    <li><a href="docs.php">Docs</a></li>
+                    <li><a href="faq.php">FAQ</a></li>
                     <li><a href="privacy.php">Privacy</a></li>
                     <li><a href="terms.php">Terms</a></li>
                 </ul>

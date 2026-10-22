@@ -1,0 +1,158 @@
+# Lan Multiplayer (Michitai.Lan) — Full Reference
+# https://lan.michitai.com — https://github.com/levandovici/lan-multiplayer
+# License: MIT No Attribution (MIT-0). Copyright (c) 2026 Nichita Levandovici.
+# This file is optimized for LLM context windows: the complete library
+# reference in one document.
+
+## What it is
+
+A LAN multiplayer networking library for game developers, available as:
+- a .NET Framework 4.8 class library (dotnet/)
+- a drop-in Unity source package (unity/, same API + mobile helpers)
+- a standalone C++20 CMake static library (cpp/, wire-compatible)
+
+It provides everything needed to host, discover and join multiplayer sessions
+on a local network, optimized for 30-60 FPS state synchronization over
+Wi-Fi/LAN. No external servers required.
+
+## Architecture
+
+Client                                  Server
+  |  -- UDP broadcast "discover" -->    |   (BroadcastServer, ports 60000-60128)
+  |  <-- ServerInfo (name, port) --     |
+  |                                     |
+  |  ------- TCP connect ---------->    |   (Server, ports 50000-50128)
+  |  ------- Terminal commands --->     |   reliable channel (frames, compressed)
+  |  <------------- responses -----     |
+  |                                     |
+  |  ======= UDP state datagrams ==>    |   (UDPChannel, same port as TCP)
+  |  <====== BroadcastState =======     |   unreliable, 30-60Hz, latest-wins
+
+Wire protocol (TCP): every message is a frame
+  [4-byte LE payload length][1-byte flags][UTF-8 payload]
+Flag 0x01 marks a GZip-compressed payload. FrameBuffer decodes partial reads
+and multiple frames per read, and rejects frames over Frame.MaxPayloadSize
+(32 MB default). UDP datagrams are [1-byte flags][payload]; keep them under
+UDPChannel.SafeDatagramSize (1472) to avoid IP fragmentation.
+
+Channel selection:
+- Client.Request / Server.Response (TCP): anything that must arrive —
+  commands, login, world data
+- Client.SendState / Server.BroadcastState (UDP): transient per-frame values
+  where a dropped packet is superseded by the next one
+
+## Namespaces
+
+Michitai.Lan.Net
+  Message, AppMessage, IdentifiedMessage, LocatedMessage, TCPClient,
+  TCPServer, TCPServerClient, UDPBroadcast, UDPChannel, Frame/FrameBuffer,
+  Compressor, PortRange, Lan (local IP helpers)
+
+Michitai.Lan.Net.Multiplayer
+  Multiplayer (static facade), Server, Client, BroadcastServer,
+  BroadcastClient
+
+Michitai.Lan.Net.Multiplayer.Commands
+  Command, Terminal
+
+Michitai.Lan.Net.Multiplayer.Chat
+  Chat, Letter
+
+Michitai.Lan.Net.Multiplayer.Data
+  ServerGameData, ClientGameData, ServerClientGameData, Credentials,
+  ServerInfo, ServerInfoStack, LocatedServerInfo, LocatedServerInfoStack,
+  MultiplayerGamesData
+
+Michitai.Lan.Data
+  IJsonStorage (dotnet) / JsonStorage (unity)
+
+Michitai.Lan.Debug
+  DebugConsole
+
+## Quick start (C# / Unity)
+
+Start a server and answer discovery probes:
+
+    Multiplayer.Name = "My Game Server";
+    Multiplayer.IpAddress = Lan.LocalIPv4Addresses(EPlatform.Standalone)[0];
+
+    Multiplayer.StartServer(
+        platform: EPlatform.Standalone,
+        serverGameData: new ServerGameData(Guid.NewGuid().ToString()),
+        processMessage: (LocatedMessage msg) =>
+            new AppMessage(1, "my-game", /* serialized ServerInfo */ "..."),
+        receiveRequestsDelayMilliseconds: 500);
+
+Discover servers on the LAN:
+
+    Multiplayer.StartBroadcastClient(
+        platform: EPlatform.Standalone,
+        request: new AppMessage(1, "my-game", "discover"),
+        onReceiveResponse: (LocatedMessage response) => {
+            // response.IPEndPoint + payload identify the server
+        },
+        receiveResponsesMilliseconds: 5000,
+        repeatAfterMilliseconds: 5000);
+
+Connect and send commands:
+
+    Multiplayer.IpAddress = serverIp;
+    Multiplayer.Port = serverPort;
+    Multiplayer.StartClient();
+
+    Multiplayer.Client.OnResponse += (message) => { /* handle reply */ };
+
+    if (Multiplayer.Client.CanRequest)
+    {
+        Multiplayer.Client.Request(new Message(
+            /* serialized */ Terminal.New()
+                .Next("login").Arg("user").Arg("pass")
+                .Next("get-data")));
+    }
+
+Per-frame state over the unreliable channel (call each frame, ~30-60 Hz):
+
+    // client -> server
+    Multiplayer.SendState(new Message(JsonUtility.ToJson(myTransform)));
+
+    // server -> all clients that have sent state
+    Multiplayer.OnState += (IPEndPoint from, Message msg) => { /* apply */ };
+    Multiplayer.BroadcastState(new Message(worldSnapshot));
+
+    // server -> one client
+    Multiplayer.SendState(clientEndPoint, new Message(playerSnapshot));
+
+## Tuning knobs and diagnostics
+
+- Compressor.Enabled, Compressor.Threshold (default 256 bytes)
+- Frame.MaxPayloadSize (default 32 MB) — corrupt-frame guard
+- UDPChannel.SafeDatagramSize (1472) — stay under to avoid IP fragmentation
+- Client.PendingRequests, TCPClient.PendingWrites,
+  TCPServer.PendingWrites — backpressure indicators
+- Client.Send(message) — fire-and-forget TCP send that skips the
+  request/response queue
+- Multiplayer lifecycle events: OnServerStarted, OnClientStarted, OnState,
+  OnServerDiscovered — see docs.php
+
+## Platform notes
+
+- EPlatform flags (Windows, Linux, MacOS, Standalone, Android, IOS, Mobile)
+  select the right network code path per platform.
+- unity/ adds MobileBroadcastClient/MobileBroadcastServer (UdpClient-based
+  discovery for Android/iOS) and Data/JsonStorage.cs.
+- cpp/ is a full C++20 port (Michitai::Lan): thread-per-connection I/O,
+  std::future async methods, multicast Event<>. Only dependency: miniz
+  (gzip). Build: cmake -S cpp -B cpp/build && cmake --build cpp/build.
+
+## Breaking change notice
+
+The transport was rewritten from a "#end#<>#message#" string-delimiter
+protocol to a binary length-prefixed frame protocol. Old and new builds
+cannot talk to each other — ship matching versions.
+
+## Website / distribution
+
+lan.michitai.com distributes the .NET and Unity packages behind an
+email-verification flow (download.php -> send_code.php -> verify.php ->
+downloads.php). The site is PHP 7.4+/MySQL; library downloads are free,
+MIT-0 licensed, no attribution required.

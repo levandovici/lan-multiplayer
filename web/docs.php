@@ -1,15 +1,26 @@
 <?php
+define('LAN_PUBLIC_PAGE', true);
 require_once 'config.php';
+require_once 'seo.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="Wed, 11 Jan 1984 05:00:00 GMT">
-    <title>Documentation - Lan Multiplayer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+    <?php seoHead([
+        'title' => 'Documentation - Lan Multiplayer',
+        'description' => 'Lan Multiplayer docs: server discovery over UDP broadcast, reliable TCP commands, UDP state sync, the command/terminal pattern and setup guides for .NET, Unity and C++.',
+        'path' => '/docs.php',
+        'keywords' => 'LAN multiplayer documentation, Michitai Lan API, Unity multiplayer tutorial, .NET LAN server discovery, UDP broadcast discovery, TCP UDP state sync docs',
+        'jsonld' => [[
+            '@type' => 'TechArticle',
+            'headline' => 'Lan Multiplayer Documentation',
+            'url' => seoUrl('/docs.php'),
+            'description' => 'Technical documentation for the Lan Multiplayer networking library.',
+            'author' => ['@type' => 'Person', 'name' => 'Nichita Levandovici'],
+        ]],
+    ]); ?>
     <link rel="stylesheet" href="css/style.css?v=<?php echo CSS_VERSION; ?>">
 </head>
 <body>
@@ -21,6 +32,7 @@ require_once 'config.php';
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
                     <li><a href="docs.php">Docs</a></li>
+                    <li><a href="faq.php">FAQ</a></li>
                     <li><a href="privacy.php">Privacy</a></li>
                     <li><a href="terms.php">Terms</a></li>
                 </ul>

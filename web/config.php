@@ -63,6 +63,8 @@ define('FROM_NAME', envValue('FROM_NAME', 'Lan Multiplayer'));
 
 // Site Configuration
 define('CODE_EXPIRY_MINUTES', envValue('CODE_EXPIRY_MINUTES', 15));
+define('SITE_URL', rtrim(envValue('SITE_URL', 'https://lan.michitai.com'), '/'));
+define('SITE_NAME', envValue('SITE_NAME', 'Lan Multiplayer'));
 
 // Environment
 define('APP_ENV', envValue('APP_ENV', 'production'));
@@ -84,13 +86,20 @@ if (APP_ENV === 'development') {
     ini_set('display_errors', 0);
 }
 
-// Prevent caching of dynamic pages
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
+// Cache policy: pages that define LAN_PUBLIC_PAGE are stateless and cacheable;
+// the download/verification flow stays uncached.
+$lanPublicPage = defined('LAN_PUBLIC_PAGE') && LAN_PUBLIC_PAGE === true;
 
-// Start Session
-if (session_status() === PHP_SESSION_NONE) {
+if ($lanPublicPage) {
+    header('Cache-Control: public, max-age=300');
+} else {
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Pragma: no-cache");
+    header("Expires: Wed, 11 Jan 1984 05:00:00 GMT");
+}
+
+// Start Session (skipped on public pages so crawlers get stateless, cookie-free responses)
+if (session_status() === PHP_SESSION_NONE && !$lanPublicPage) {
     session_start();
 }
 

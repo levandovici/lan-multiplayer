@@ -1,0 +1,48 @@
+# Lan Multiplayer / Michitai.Lan (lan.michitai.com)
+
+> Free, open-source LAN multiplayer networking library for game developers.
+> Provides automatic server discovery, a reliable TCP command channel and an
+> unreliable UDP state channel for 30-60 FPS synchronization over Wi-Fi/LAN.
+> Released under the MIT No Attribution (MIT-0) license — free for personal,
+> educational and commercial use with no attribution required.
+> Copyright (c) 2026 Nichita Levandovici.
+
+Author: Nichita Levandovici (Michitai), Republic of Moldova
+Contact: support@michitai.com
+Source: https://github.com/levandovici/lan-multiplayer
+
+## Features
+
+- Automatic LAN server discovery: servers answer UDP broadcast probes
+  (ports 60000-60128); clients scan the network for running sessions
+- Reliable TCP channel: length-prefixed binary framing, NoDelay,
+  SocketAsyncEventArgs I/O, queued writes (ports 50000-50128)
+- Unreliable UDP state channel for per-frame data at 30-60 Hz with no
+  head-of-line blocking; bound to the same port as the TCP server
+- Transparent GZip compression for payloads >= 256 bytes
+- Fluent Command/Terminal pattern for batching named commands with arguments
+- Game data models (ServerGameData, ClientGameData, PlayerGameData,
+  Credentials, ServerInfo) with public/private views and JSON storage
+- Bounded, thread-safe Chat/Letter container
+- Cross-platform: Windows, Linux, macOS, Android, iOS via EPlatform flags
+
+## Builds / Documentation
+
+- [Download](https://lan.michitai.com/download.php): .NET Framework 4.8 and Unity packages (email-verified)
+- [Docs](https://lan.michitai.com/docs.php): setup and usage guides
+- [FAQ](https://lan.michitai.com/faq.php): common questions
+- [Full reference](https://lan.michitai.com/llms-full.txt): complete API
+  overview in one file — namespaces, wire protocol, quick-start code
+
+## Variants
+
+- dotnet/ — .NET Framework 4.8 class library (Michitai.Lan)
+- unity/ — Unity source variant (same API + Android/iOS discovery helpers)
+- cpp/ — C++20 port, standalone CMake static lib, wire-compatible
+
+## Machine-readable (for AI assistants and agents)
+
+- [llms-full.txt](https://lan.michitai.com/llms-full.txt): the complete
+  library reference sized for a model's context window — feed it to any AI
+  assistant to generate integration code
+- Site map: https://lan.michitai.com/sitemap.xml
