@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
     <header>
         <div class="container">
             <nav>
-                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"></a>
+                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"><span>Lan Multiplayer</span></a>
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
@@ -146,6 +146,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'])) {
                     <button type="submit" class="btn">Send Verification Code</button>
                 </form>
             </div>
+
+            <section class="what-is">
+                <div class="section-header">
+                    <h2>What you get</h2>
+                    <p>The download is a single package with the complete Lan Multiplayer source code — no installer, no account wall beyond a one-time email verification, and no telemetry. Drop the sources into your project and you own the code.</p>
+                </div>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>.NET library</h3>
+                        <p>The full C# implementation for .NET Framework 4.8 and modern .NET, including the UDP broadcast discovery client, the reliable length-prefixed TCP channel, the unreliable UDP state channel, GZip compression and the terminal command system.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>Unity package</h3>
+                        <p>The same engine adapted for Unity projects, so Windows, Linux, macOS, Android and iOS builds share one networking codebase. Copy the scripts into your Assets folder and the API is identical to the .NET version.</p>
+                    </div>
+                    <div class="feature-card">
+                        <h3>C++ sources</h3>
+                        <p>Native C++ sources for engines and platforms without a .NET runtime, plus documentation and copy-paste examples for the common patterns: discovery, starting a server, connecting a client and syncing per-frame state at 30-60 Hz.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="license-info">
+                <h3>How verification works</h3>
+                <p>Enter your email above and we send you a short verification code. The code proves the address is real and lets us notify you about breaking changes and new releases — nothing else. After verification the download starts immediately and the library is yours under the MIT-0 license: free for personal, educational and commercial use, with no attribution required. If the message does not arrive within a minute, check the spam folder or request a new code. Once you have the package, the <a href="docs.php">documentation</a> walks through discovery, server setup, client connection and per-frame state sync, and the <a href="faq.php">FAQ</a> answers the common integration questions.</p>
+            </section>
         </div>
     </main>
 

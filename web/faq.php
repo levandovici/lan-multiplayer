@@ -65,7 +65,7 @@ $faqSchema = [
     <header>
         <div class="container">
             <nav>
-                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"></a>
+                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"><span>Lan Multiplayer</span></a>
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
@@ -82,7 +82,7 @@ $faqSchema = [
         <div class="container">
             <div class="content-page">
                 <section class="doc-section">
-                    <h2>Frequently Asked Questions</h2>
+                    <h1>Frequently Asked Questions</h1>
                     <p>Everything you need to know about the Lan Multiplayer library. For implementation details see the <a href="docs.php">documentation</a>.</p>
                 </section>
 

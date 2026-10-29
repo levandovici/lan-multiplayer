@@ -25,7 +25,7 @@ require_once 'seo.php';
     <header>
         <div class="container">
             <nav>
-                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"></a>
+                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"><span>Lan Multiplayer</span></a>
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>

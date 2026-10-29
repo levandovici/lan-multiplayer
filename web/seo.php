@@ -38,6 +38,8 @@ function seoDefaultGraph(): array {
                 '@type' => 'Offer',
                 'price' => '0',
                 'priceCurrency' => 'USD',
+                'priceValidUntil' => '2030-12-31',
+                'availability' => 'https://schema.org/InStock',
             ],
             'downloadUrl' => seoUrl('/download.php'),
         ],

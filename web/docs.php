@@ -27,7 +27,7 @@ require_once 'seo.php';
     <header>
         <div class="container">
             <nav>
-                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"></a>
+                <a href="index.php" class="logo"><img src="logo.png" alt="Lan Multiplayer"><span>Lan Multiplayer</span></a>
                 <ul class="nav-links">
                     <li><a href="index.php">Home</a></li>
                     <li><a href="about.php">About</a></li>
@@ -44,6 +44,7 @@ require_once 'seo.php';
         <div class="container">
             <div class="content-page">
             <section class="doc-section">
+                <h1>Lan Multiplayer Documentation</h1>
                 <h2>Overview</h2>
                 <p>Michitai LAN Multiplayer is a comprehensive networking library for building local area network multiplayer games and applications. It provides both Unity and .NET implementations with support for multiple platforms including Windows, Linux, macOS, Android, and iOS.</p>
                 
