@@ -18,6 +18,9 @@ require_once 'seo.php';
             'headline' => 'Lan Multiplayer Documentation',
             'url' => seoUrl('/docs.php'),
             'description' => 'Technical documentation for the Lan Multiplayer networking library.',
+            'image' => seoUrl('logo.png'),
+            'datePublished' => '2026-01-01',
+            'dateModified' => date('Y-m-d'),
             'author' => ['@type' => 'Person', 'name' => 'Nichita Levandovici'],
         ]],
     ]); ?>

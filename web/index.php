@@ -7,6 +7,9 @@ $howTo = [
     '@type' => 'HowTo',
     'name' => 'How to add LAN multiplayer to a game with Lan Multiplayer',
     'description' => 'Download the free MIT-0 library, drop the sources into a .NET, Unity or C++ project, then discover servers and sync state on the local network.',
+    'image' => seoUrl('logo.png'),
+    'totalTime' => 'PT15M',
+    'estimatedCost' => ['@type' => 'MonetaryAmount', 'currency' => 'USD', 'value' => '0'],
     'step' => [
         ['@type' => 'HowToStep', 'position' => 1, 'name' => 'Download the library', 'url' => seoUrl('/download.php')],
         ['@type' => 'HowToStep', 'position' => 2, 'name' => 'Add the sources to your .NET, Unity or C++ project', 'url' => seoUrl('/docs.php')],
